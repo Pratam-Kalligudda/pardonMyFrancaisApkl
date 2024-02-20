@@ -1,0 +1,68 @@
+// widgets/level_tile.dart
+
+import 'package:flutter/material.dart';
+
+class LevelTile extends StatelessWidget {
+  final String name;
+  final String subName;
+
+  const LevelTile({
+    Key? key,
+    required this.name,
+    required this.subName,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/lessonDetail',
+            arguments: {
+              'lessonName':
+                  subName, // Assuming you want to pass lessonName as well
+              'levelName': name,
+            },
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      subName,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
