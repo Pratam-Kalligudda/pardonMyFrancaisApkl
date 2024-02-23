@@ -16,7 +16,7 @@ class SignInPage extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<SignInPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
@@ -24,28 +24,35 @@ class _LoginScreenState extends State<SignInPage> {
   void dispose() {
     super.dispose();
     _passwordController.dispose();
-    _emailController.dispose();
+    _usernameController.dispose();
   }
 
-  Duration simulatedProcessDelay = const Duration(seconds: 2);
-
-  bool _detailsAreNotEntered(
-      TextEditingController emailController, TextEditingController passwordController) {
-    return emailController.text.isEmpty || passwordController.text.isEmpty;
+    @override
+  void initState() {
+    super.initState();
+    _checkLoggedIn();
   }
 
-  void _showSignInSnackbar(BuildContext context) {
-    showStyledSnackBar(context, 'Please enter your email and password to sign in.');
+  void _checkLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token != null) {
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    }
   }
 
-    Future<void> _signIn(String email, String password) async {
+  void _showSignInSnackbar(BuildContext context, String message) {
+    showStyledSnackBar(context, message);
+  }
+
+  Future<void> _signIn(String username, String password) async {
     setState(() {
       _isLoading = true;
     });
 
     final Uri url = Uri.parse('http://ec2-44-211-62-237.compute-1.amazonaws.com/api/login');
     final Map<String, String> requestBody = {
-      'email': email,
+      'username': username,
       'password': password,
     };
 
@@ -68,13 +75,13 @@ class _LoginScreenState extends State<SignInPage> {
         // Navigate to the home screen
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
-        // Show error message
-        showStyledSnackBar(context, 'Invalid email or password.');
+        final String errorMessage = jsonDecode(response.body)['error'];
+        _showSignInSnackbar(context, errorMessage);
       }
     } catch (e) {
       // Handle network errors
       print('Error: $e');
-      showStyledSnackBar(context, 'Failed to sign in. Please try again later.');
+      _showSignInSnackbar(context, 'Failed to sign in. Please try again later.');
     } finally {
       setState(() {
         _isLoading = false;
@@ -122,9 +129,9 @@ class _LoginScreenState extends State<SignInPage> {
               height: 30,
             ),
             TextFieldInput(
-                  textEditingController: _emailController,
-                  hintText: "Email",
-                  textInputType: TextInputType.emailAddress,
+                  textEditingController: _usernameController,
+                  hintText: "Username",
+                  textInputType: TextInputType.text,
                 ),
                 const SizedBox(
                   height: 12,
@@ -139,17 +146,18 @@ class _LoginScreenState extends State<SignInPage> {
                   height: 60,
                 ),
                 CustomButton(
-                  text: 'Sign In',
-                  onPressed: () {
-                    if (_detailsAreNotEntered(
-                        _emailController, _passwordController)) {
-                      _showSignInSnackbar(context);
-                      return;
-                    }
-                    _signIn(_emailController.text, _passwordController.text);
-                  },
-                  isLoading: _isLoading,
-                ),
+              text: 'Sign In',
+              onPressed: () {
+                final username = _usernameController.text.trim();
+                final password = _passwordController.text.trim();
+                if (username.isEmpty || password.isEmpty) {
+                  _showSignInSnackbar(context, 'Please enter username and password');
+                } else {
+                  _signIn(username, password);
+                }
+              },
+              isLoading: _isLoading,
+            ),
                 const SizedBox(
                   height: 30,
                 ),
