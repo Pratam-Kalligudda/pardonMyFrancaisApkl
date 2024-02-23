@@ -1,13 +1,9 @@
 // pages/sign_up_page.dart
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:french_app/models/user.dart';
-import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/text_field_input.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -129,8 +125,12 @@ class _SignUpPageState extends State<SignupPage> {
             CustomButton(
               text: "Sign Up",
               onPressed: () {
-                signup(_usernameController.text, _emailController.text,
-                    _passwordController.text);
+                if (_detailsAreNotEntered(_usernameController, _emailController, _passwordController)) {
+                  _showSignUpSnackbar(context);
+                  return; // Return to prevent further execution
+                }
+                // Proceed with signup process
+                signup(_usernameController.text, _emailController.text, _passwordController.text);
               },
               isLoading: _isLoading,
             ),
@@ -167,4 +167,15 @@ class _SignUpPageState extends State<SignupPage> {
       ),
     );
   }
+}
+
+bool _detailsAreNotEntered(TextEditingController usernameController, TextEditingController emailController, TextEditingController passwordController) {
+  return usernameController.text.isEmpty || emailController.text.isEmpty || passwordController.text.isEmpty;
+}
+
+void _showSignUpSnackbar(BuildContext context) {
+  const snackBar = SnackBar(
+    content: Text('Please enter your username, email, and password to sign up.'),
+  );
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

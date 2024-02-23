@@ -1,3 +1,5 @@
+// providers/user_provider.dart
+
 import 'package:flutter/material.dart';
 import 'package:french_app/models/user.dart';
 

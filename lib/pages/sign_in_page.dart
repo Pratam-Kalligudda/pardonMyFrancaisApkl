@@ -1,9 +1,12 @@
-//pages/sign_in_page.dart
+// pages/sign_in_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:french_app/pages/home_page.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:french_app/widgets/custom_button.dart';
+import 'package:french_app/widgets/snackbar.dart';
 import 'package:french_app/widgets/text_field_input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -26,25 +29,64 @@ class _LoginScreenState extends State<SignInPage> {
 
   Duration simulatedProcessDelay = const Duration(seconds: 2);
 
-  void loginUser() {
-    // Simulate logging in user
+  bool _detailsAreNotEntered(
+      TextEditingController emailController, TextEditingController passwordController) {
+    return emailController.text.isEmpty || passwordController.text.isEmpty;
+  }
+
+  void _showSignInSnackbar(BuildContext context) {
+    showStyledSnackBar(context, 'Please enter your email and password to sign in.');
+  }
+
+    Future<void> _signIn(String email, String password) async {
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate a delay for login process
-    Future.delayed(simulatedProcessDelay, () {
+    final Uri url = Uri.parse('http://ec2-44-211-62-237.compute-1.amazonaws.com/api/login');
+    final Map<String, String> requestBody = {
+      'email': email,
+      'password': password,
+    };
+
+    try {
+      final http.Response response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final String token = responseData['token'];
+
+        // Store token securely
+        await _storeToken(token);
+
+        // Navigate to the home screen
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      } else {
+        // Show error message
+        showStyledSnackBar(context, 'Invalid email or password.');
+      }
+    } catch (e) {
+      // Handle network errors
+      print('Error: $e');
+      showStyledSnackBar(context, 'Failed to sign in. Please try again later.');
+    } finally {
       setState(() {
         _isLoading = false;
       });
-
-      // Navigate to the home screen
-      if (context.mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      }
-    });
+    }
   }
 
+  Future<void> _storeToken(String token) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,8 +139,15 @@ class _LoginScreenState extends State<SignInPage> {
                   height: 60,
                 ),
                 CustomButton(
-                  text: "Sign In",
-                  onPressed: loginUser,
+                  text: 'Sign In',
+                  onPressed: () {
+                    if (_detailsAreNotEntered(
+                        _emailController, _passwordController)) {
+                      _showSignInSnackbar(context);
+                      return;
+                    }
+                    _signIn(_emailController.text, _passwordController.text);
+                  },
                   isLoading: _isLoading,
                 ),
                 const SizedBox(
@@ -136,7 +185,7 @@ class _LoginScreenState extends State<SignInPage> {
           },
       ),
     ),
-
     );
   }
 }
+

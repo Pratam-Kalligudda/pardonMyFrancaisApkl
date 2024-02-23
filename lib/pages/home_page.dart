@@ -1,13 +1,10 @@
-// pages/home_page
+// pages/home_page.dart
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:french_app/models/user.dart';
-import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -107,7 +104,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 5),
               Text(
-                _user?.registrationDate ?? "23 Jan, 2023",
+                _user?.registrationDate ?? "1 Jan, 2002",
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onBackground,
                   fontSize: 16,

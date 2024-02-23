@@ -1,3 +1,5 @@
+// models/user.dart
+
 import 'package:intl/intl.dart';
 
 class User {

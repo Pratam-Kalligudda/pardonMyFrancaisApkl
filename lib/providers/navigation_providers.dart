@@ -1,8 +1,10 @@
+// providers/navigation_providers.dart
+
 import 'package:flutter/material.dart';
 
 class BottomNavBarProvider extends ChangeNotifier {
   int _currentIndex = 0;
-  List<String> _navigationStack = ['WelcomePage'];
+  final List<String> _navigationStack = ['WelcomePage'];
 
   int get currentIndex => _currentIndex;
   List<String> get navigationStack => _navigationStack;

@@ -1,6 +1,4 @@
-// To parse this JSON data, do
-//
-//     final levels = levelsFromJson(jsonString);
+// models/level.dart
 
 import 'dart:convert';
 

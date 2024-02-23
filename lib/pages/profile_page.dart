@@ -1,3 +1,5 @@
+// pages/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart'; // Import your custom bottom navigation bar widget
 

@@ -34,13 +34,13 @@ class LessonDetailPage extends StatelessWidget {
             onPressed: () {
               // Handle notifications button press
             },
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
           ),
           IconButton(
             onPressed: () {
               // Handle logout button press
             },
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
           ),
         ],
         ),

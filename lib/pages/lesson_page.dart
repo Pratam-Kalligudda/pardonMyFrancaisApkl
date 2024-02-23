@@ -1,4 +1,4 @@
-// pages/lessons_page.dart
+// pages/lesson_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/home_page.dart';
