@@ -15,8 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 // Inside the onPressed callback of your logout button/icon
-void _logout(BuildContext context) {
+void _logout(BuildContext context) async {
   // Navigate back to the welcome page and clear the navigation stack
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('token');
+  await prefs.remove('user');
   Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
 }
 
