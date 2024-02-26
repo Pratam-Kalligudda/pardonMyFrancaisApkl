@@ -1,8 +1,10 @@
 // pages/lesson_detail_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/lesson_detail_tile.dart';
+import 'package:provider/provider.dart';
 
 class LessonDetailPage extends StatelessWidget {
   final String lessonName;
@@ -16,12 +18,9 @@ class LessonDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve arguments
-    final arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-
-    // Extract lessonName and levelName
-    // final lessonName = arguments?['lessonName'] ?? 'Lesson Name';
-    final levelName = arguments?['levelName'] ?? 'Level Name';
+    final Map<String, dynamic>? arguments =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final String levelName = arguments?['levelName'] ?? 'Level Name';
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +42,7 @@ class LessonDetailPage extends StatelessWidget {
             icon: const Icon(Icons.logout),
           ),
         ],
-        ),
+      ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: 0, // Set the appropriate index for this page
         onTap: (index) {
@@ -67,21 +66,35 @@ class LessonDetailPage extends StatelessWidget {
                   Text(
                     '$levelName Guide',
                     style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 10, // Adjust the number of tiles
-                      itemBuilder: (context, index) {
-                        return LessonDetailTile(
-                          phrase: 'Phrase ${index + 1}',
-                          pronunciation: 'Pronunciation ${index + 1}',
-                          translation: 'Translation ${index + 1}',
-                        );
+                    child: Consumer<LevelProvider>(
+                      builder: (context, levelProvider, child) {
+                        levelProvider.fetchGuidebooks();
+                        if (levelProvider.levels.isEmpty) {
+                          return Center(
+                            child: Text('No guidebook content available'),
+                          );
+                        } else {
+                          return ListView.builder(
+                            itemCount:
+                                levelProvider.levels[0].guidebookContent.length,
+                            itemBuilder: (context, index) {
+                              final level = levelProvider
+                                  .levels[0].guidebookContent[index];
+                              return LessonDetailTile(
+                                phrase: level.frenchWord,
+                                pronunciation: level.frenchPronunciation,
+                                translation: level.englishTranslation,
+                              );
+                            },
+                          );
+                        }
                       },
                     ),
                   ),
@@ -90,13 +103,14 @@ class LessonDetailPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(
-                          context,
-                          '/mcqTest',
-                          arguments: {
-                            'lessonName': lessonName, // Assuming you want to pass lessonName as well
-                            'levelName': levelName,
-                          },
-                        );
+            context,
+            '/mcqTest',
+            arguments: {
+              'lessonName':
+                  lessonName, // Assuming you want to pass lessonName as well
+              'levelName': levelName,
+            },
+          );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,

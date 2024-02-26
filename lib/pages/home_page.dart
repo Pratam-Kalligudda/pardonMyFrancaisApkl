@@ -1,11 +1,17 @@
 // pages/home_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
+
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -25,11 +31,13 @@ void _logout(BuildContext context) async {
 
 class _HomePageState extends State<HomePage> {
   User? _user;
+  List<Levels> guidebookData = [];
 
   @override
   void initState() {
     super.initState();
     loadUserDetails();
+    fetchData();
   }
 
   Future<void> loadUserDetails() async {
@@ -42,6 +50,20 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _user = user;
       });
+    }
+  }
+
+  Future<List<Levels>> fetchData() async {
+    final response = await http.get(Uri.parse(
+        'http://ec2-44-211-62-237.compute-1.amazonaws.com/api/guidebook'));
+    if (response.statusCode == 200) {
+      List<dynamic> jsonData = json.decode(response.body);
+      List<Levels> levels =
+          jsonData.map((data) => Levels.fromJson(data)).toList();
+      return levels;
+    } else {
+      print('Failed to load guidebook data: ${response.statusCode}');
+      throw Exception('Failed to load levels');
     }
   }
 
@@ -90,46 +112,65 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Hi, ${_user?.username}',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onBackground,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'Hi, ${_user?.username}',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 5),
-              Text(
-                _user?.registrationDate ?? "1 Jan, 2002",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onBackground,
-                  fontSize: 16,
-                ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              _user?.registrationDate ?? "1 Jan, 2002",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onBackground,
+                fontSize: 16,
               ),
-              const SizedBox(height: 40),
-              Text(
-                'Levels',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+            ),
+            const SizedBox(height: 40),
+            Text(
+              'Levels',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              const SizedBox(height: 20),
-              for (int index = 0; index < 10; index++)
-                LevelTile(
-                  name: 'Level ${index + 1}',
-                  subName: 'Subtitle',
-                ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+            FutureBuilder<List<Levels>>(
+              future: fetchData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (snapshot.hasData) {
+                  List<Levels> levels = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: levels.length,
+                    itemBuilder: (context, index) {
+                      var level = levels[index];
+                      return LevelTile(
+                        name: level.levelName,
+                        subName: level.subtitle,
+                      );
+                    },
+                  );
+                } else {
+                  return const Center(child: Text('No data available'));
+                }
+              },
+            )
+          ],
         ),
       ),
     );

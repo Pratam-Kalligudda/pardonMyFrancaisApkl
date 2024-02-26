@@ -1,6 +1,8 @@
 // widgets/level_tile.dart
 
 import 'package:flutter/material.dart';
+import 'package:french_app/providers/guidebook_provider.dart';
+import 'package:provider/provider.dart';
 
 class LevelTile extends StatelessWidget {
   final String name;
@@ -18,6 +20,8 @@ class LevelTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10.0),
       child: InkWell(
         onTap: () {
+          Provider.of<LevelProvider>(context, listen: false)
+              .updateLevelName(name);
           Navigator.pushNamed(
             context,
             '/lessonDetail',
