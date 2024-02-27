@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) => const WelcomePage(),
           '/signIn': (context) => const SignInPage(),
-          '/signUp': (context) => const SignupPage(),
+          '/signUp': (context) => const SignUpPage(),
           '/home': (context) => const HomePage(),
           '/lessonDetail': (context) =>
               const LessonDetailPage(lessonName: '', levelName: ''),
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
                 lessonName: '',
                 levelName: '',
               ),
-          '/profile': (context) => ProfilePage(),
+          '/profile': (context) => const ProfilePage(),
         },
       ),
     );

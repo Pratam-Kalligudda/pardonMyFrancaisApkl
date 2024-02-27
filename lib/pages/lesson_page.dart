@@ -25,7 +25,7 @@ class LessonsPage extends StatelessWidget {
               break;
             case 1:
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => ProfilePage()),
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
               );
               break;
           }

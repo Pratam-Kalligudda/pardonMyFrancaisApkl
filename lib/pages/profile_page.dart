@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart'; // Import your custom bottom navigation bar widget
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {

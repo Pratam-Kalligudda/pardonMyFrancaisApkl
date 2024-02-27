@@ -1,5 +1,7 @@
 // pages/sign_up_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/widgets/custom_button.dart';
@@ -7,14 +9,14 @@ import 'package:french_app/widgets/text_field_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({Key? key}) : super(key: key);
 
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignupPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -28,7 +30,7 @@ class _SignUpPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  Future<void> signup(String username, String email, String password) async {
+  Future<void> signUp(String username, String email, String password) async {
     setState(() {
       _isLoading = true;
     });
@@ -69,7 +71,7 @@ class _SignUpPageState extends State<SignupPage> {
       setState(() {
         _isLoading = false;
       });
-      throw Exception('Failed to signup');
+      throw Exception('Failed to sign up');
     }
   }
 
@@ -129,8 +131,8 @@ class _SignUpPageState extends State<SignupPage> {
                   _showSignUpSnackbar(context);
                   return; // Return to prevent further execution
                 }
-                // Proceed with signup process
-                signup(_usernameController.text, _emailController.text, _passwordController.text);
+                // Proceed with signUp process
+                signUp(_usernameController.text, _emailController.text, _passwordController.text);
               },
               isLoading: _isLoading,
             ),

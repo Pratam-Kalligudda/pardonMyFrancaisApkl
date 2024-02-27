@@ -77,7 +77,7 @@ class LessonDetailPage extends StatelessWidget {
                       builder: (context, levelProvider, child) {
                         levelProvider.fetchGuidebooks();
                         if (levelProvider.levels.isEmpty) {
-                          return Center(
+                          return const Center(
                             child: Text('No guidebook content available'),
                           );
                         } else {

@@ -22,8 +22,9 @@ class MCQTestPage extends StatefulWidget {
 class _MCQTestPageState extends State<MCQTestPage> {
   late Future<List<SubLevels>> _futureSubLevels;
   int currentQuestionIndex = 0;
-  late List<Questions> questions;
+  List<Questions>? questions;
   late List<int> selectedOptions;
+  late String levelName;
 
   @override
   void initState() {
@@ -34,11 +35,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   Future<List<SubLevels>> _fetchSubLevels() async {
     try {
+      print("object");
       final jwtToken = await _getJwtToken();
       if (jwtToken == null) {
         throw Exception('JWT token not found');
       }
-      String encodedLevelName = Uri.encodeComponent(widget.levelName);
+      String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
         Uri.parse(
             'http://ec2-44-211-62-237.compute-1.amazonaws.com/api/sublevels/$encodedLevelName'),
@@ -46,6 +48,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
           'Authorization': 'Bearer $jwtToken',
         },
       );
+      print(response.statusCode);
       if (response.statusCode == 200) {
         print(response.body);
         List<dynamic> jsonResponse = jsonDecode(response.body);
@@ -54,7 +57,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
         throw Exception('Failed to load guidebooks');
       }
     } catch (error) {
-      rethrow;
+      print('Error fetching sublevels: $error');
+      rethrow; // Rethrow the error to handle it outside
     }
   }
 
@@ -71,8 +75,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   void nextQuestion() {
     setState(() {
-      currentQuestionIndex++;
-      if (currentQuestionIndex == questions.length) {
+      if (currentQuestionIndex < questions!.length - 1) {
+        currentQuestionIndex++;
+        print("currentQuestionIndex Updated: $currentQuestionIndex");
+      } else {
         _showNextTestConfirmationDialog();
       }
     });
@@ -140,6 +146,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String lvlName = args?['levelName'] ?? '';
+    levelName = lvlName;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.levelName} MCQ Test'),
@@ -156,7 +167,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
                 final subLevels = snapshot.data as List<SubLevels>;
-                questions = subLevels[currentQuestionIndex].questions;
+                questions = subLevels[0].questions;
+                print(questions!.length);
+                print("currentQuestionIndex: $currentQuestionIndex");
+                print(questions![3].options.length);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -179,7 +193,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     ),
                     const SizedBox(height: 30),
                     Text(
-                      questions[currentQuestionIndex].question,
+                      questions![currentQuestionIndex].question,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -187,50 +201,60 @@ class _MCQTestPageState extends State<MCQTestPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: questions[currentQuestionIndex].options.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            selectOption(index);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  selectedOptions[currentQuestionIndex] == index
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 16, horizontal: 16),
-                            child: Text(
-                              questions[currentQuestionIndex].options[index],
-                              style: TextStyle(
+                    Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount:
+                            questions![currentQuestionIndex].options.length,
+                        itemBuilder: (context, index) {
+                          print("index:$index");
+                          print(
+                              questions![currentQuestionIndex].options[index]);
+                          return InkWell(
+                            onTap: () {
+                              selectOption(index);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
                                 color: selectedOptions[currentQuestionIndex] ==
                                         index
-                                    ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(context).colorScheme.onSurface,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  width: 2,
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 16),
+                              child: Text(
+                                questions![currentQuestionIndex].options[index],
+                                style: TextStyle(
+                                  color: selectedOptions[
+                                              currentQuestionIndex] ==
+                                          index
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSurface,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
                         if (selectedOptions[currentQuestionIndex] != -1) {
-                          if (currentQuestionIndex < questions.length - 1) {
+                          if (currentQuestionIndex < questions!.length - 1) {
+                            print("trying nextQuestion function");
                             nextQuestion();
                           } else {
+                            print("trying nexTextConfirmationDialog function");
                             _showNextTestConfirmationDialog();
                           }
                         } else {
@@ -253,7 +277,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         ),
                       ),
                       child: Text(
-                        currentQuestionIndex < questions.length - 1
+                        currentQuestionIndex < questions!.length - 1
                             ? 'Next'
                             : 'Submit',
                         style: const TextStyle(fontSize: 18),
