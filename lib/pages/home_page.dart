@@ -118,17 +118,27 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            Text(
-              'Hi, ${_user?.username}',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onBackground,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+                children: [
+                  const TextSpan(text: "Hi, "),
+                  TextSpan(
+                    text: _user?.username,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 5),
             Text(
-              _user?.registrationDate ?? "1 Jan, 2002",
+              "Date Joined: ${_user?.registrationDate}",
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onBackground,
                 fontSize: 16,
@@ -143,6 +153,10 @@ class _HomePageState extends State<HomePage> {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
+            const SizedBox(
+              height: 16,
+            ),
+            const Divider(),
             const SizedBox(height: 20),
             FutureBuilder<List<Levels>>(
               future: fetchData(),
@@ -162,6 +176,7 @@ class _HomePageState extends State<HomePage> {
                       return LevelTile(
                         name: level.levelName,
                         subName: level.subtitle,
+                        index: index + 1,
                       );
                     },
                   );

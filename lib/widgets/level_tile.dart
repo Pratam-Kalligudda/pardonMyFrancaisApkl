@@ -7,11 +7,13 @@ import 'package:provider/provider.dart';
 class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
+  final int index;
 
   const LevelTile({
     Key? key,
     required this.name,
     required this.subName,
+    required this.index,
   }) : super(key: key);
 
   @override
@@ -42,16 +44,32 @@ class LevelTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            width: 3),
                       ),
+                      child: Center(
+                        child: Text(
+                          "$index",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Padding(padding: EdgeInsets.only(left: 18)),
+                    VerticalDivider(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     Text(
                       subName,

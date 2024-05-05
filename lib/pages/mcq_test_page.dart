@@ -25,12 +25,14 @@ class _MCQTestPageState extends State<MCQTestPage> {
   List<Questions>? questions;
   late List<int> selectedOptions;
   late String levelName;
+  bool isAnswerSubmitted = false;
+  bool isEnd = false;
 
   @override
   void initState() {
     super.initState();
     _futureSubLevels = _fetchSubLevels();
-    selectedOptions = List<int>.filled(4, -1);
+    selectedOptions = List<int>.filled(7, -1);
   }
 
   Future<List<SubLevels>> _fetchSubLevels() async {
@@ -77,9 +79,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
     setState(() {
       if (currentQuestionIndex < questions!.length - 1) {
         currentQuestionIndex++;
-        print("currentQuestionIndex Updated: $currentQuestionIndex");
+        isAnswerSubmitted = false;
       } else {
-        _showNextTestConfirmationDialog();
+        isEnd = true;
       }
     });
   }
@@ -115,12 +117,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 Navigator.of(context).pop();
                 // Perform the action to move to the next test
               },
-              child: const Text(
+              child: Text(
                 'Yes',
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
               ),
             ),
@@ -129,12 +131,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 Navigator.of(context).pop();
                 // Perform any other action you want here
               },
-              child: const Text(
+              child: Text(
                 'No',
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
             ),
@@ -142,6 +144,42 @@ class _MCQTestPageState extends State<MCQTestPage> {
         );
       },
     );
+  }
+
+  void checkAnswerAndProceed() {
+    if (selectedOptions[currentQuestionIndex] != -1) {
+      final selectedOptionIndex = selectedOptions[currentQuestionIndex];
+      final correctOptionIndex = questions![currentQuestionIndex]
+          .options
+          .indexOf(questions![currentQuestionIndex].correctOption);
+      final isCorrect = selectedOptionIndex == correctOptionIndex;
+
+      setState(() {
+        isAnswerSubmitted = true;
+      });
+
+      if (isCorrect) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Correct Answer!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Wrong Answer!'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an option'),
+        ),
+      );
+    }
   }
 
   @override
@@ -207,9 +245,15 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         itemCount:
                             questions![currentQuestionIndex].options.length,
                         itemBuilder: (context, index) {
+                          print("===================================");
                           print("index:$index");
+                          print("Option Length -------------------------");
+                          print(
+                              questions![currentQuestionIndex].options.length);
                           print(
                               questions![currentQuestionIndex].options[index]);
+
+                          print("===================================");
                           return InkWell(
                             onTap: () {
                               selectOption(index);
@@ -249,20 +293,90 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        if (selectedOptions[currentQuestionIndex] != -1) {
-                          if (currentQuestionIndex < questions!.length - 1) {
-                            print("trying nextQuestion function");
-                            nextQuestion();
+                        // if (selectedOptions[currentQuestionIndex] != -1) {
+                        //   if (currentQuestionIndex < questions!.length - 1) {
+                        //     print("trying nextQuestion function");
+                        //     nextQuestion();
+                        //   } else {
+                        //     print("trying nexTextConfirmationDialog function");
+                        //     _showNextTestConfirmationDialog();
+                        //   }
+                        // } else {
+                        //   // Show a message indicating the user to select an option
+                        //   ScaffoldMessenger.of(context).showSnackBar(
+                        //     const SnackBar(
+                        //       content: Text('Please select an option'),
+                        //     ),
+                        //   );
+                        // }
+                        // if (!isAnswerSubmitted) {
+                        //   checkAnswerAndProceed();
+                        // } else {
+                        //   if (currentQuestionIndex < questions!.length - 1) {
+                        //     print("trying nextQuestion function");
+                        //     nextQuestion();
+                        //     setState(() {
+                        //       isAnswerSubmitted = false;
+                        //     });
+                        //   } else {
+                        //     setState(() {
+                        //       isEnd = true;
+                        //     });
+                        //     print("trying nexTextConfirmationDialog function");
+                        //     _showNextTestConfirmationDialog();
+                        //   }
+                        // }
+                        if (!isEnd) {
+                          if (!isAnswerSubmitted) {
+                            checkAnswerAndProceed();
                           } else {
-                            print("trying nexTextConfirmationDialog function");
-                            _showNextTestConfirmationDialog();
+                            nextQuestion();
                           }
                         } else {
-                          // Show a message indicating the user to select an option
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please select an option'),
-                            ),
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              int correctAnswers = 0;
+                              for (int i = 0; i < questions!.length; i++) {
+                                if (selectedOptions[i] ==
+                                    questions![i]
+                                        .options
+                                        .indexOf(questions![i].correctOption)) {
+                                  correctAnswers++;
+                                }
+                              }
+                              return AlertDialog(
+                                title: Text(
+                                  'End of Test',
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface),
+                                ),
+                                content: Text(
+                                  'You answered $correctAnswers out of ${questions!.length} questions correctly.',
+                                  style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface),
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      // Perform any other action you want here
+                                    },
+                                    child: const Text(
+                                      'Close',
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         }
                       },
@@ -277,9 +391,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         ),
                       ),
                       child: Text(
-                        currentQuestionIndex < questions!.length - 1
-                            ? 'Next'
-                            : 'Submit',
+                        !isEnd
+                            ? isAnswerSubmitted
+                                ? 'continue'
+                                : 'check'
+                            : 'end test',
+                        // isAnswerSubmitted ? 'Next' : 'Check',
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),

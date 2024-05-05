@@ -10,7 +10,8 @@ ThemeData darkTheme = ThemeData(
       iconTheme: IconThemeData(color: Color.fromRGBO(0, 255, 227, 1)),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(0, 255, 227, 1), // Set your desired color
+      selectedItemColor:
+          Color.fromRGBO(0, 255, 227, 1), // Set your desired color
       unselectedItemColor: Colors.white,
       backgroundColor: Colors.black,
     ),
@@ -18,7 +19,7 @@ ThemeData darkTheme = ThemeData(
         brightness: Brightness.dark,
         primary: const Color.fromRGBO(0, 255, 227, 1),
         onPrimary: Colors.grey[900]!,
-        secondary: const Color.fromARGB(255, 255, 0, 17),
+        secondary: const Color.fromRGBO(0, 191, 255, 1),
         onSecondary: Colors.grey[200]!,
         error: Colors.red,
         onError: Colors.white,
