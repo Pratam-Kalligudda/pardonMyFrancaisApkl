@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:french_app/pages/notificatons_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
@@ -81,9 +82,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _handleNotificationsPress() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Notifications pressed')),
-    );
+      Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationsPage()),
+      );
   }
 
   void _logout(BuildContext context) async {

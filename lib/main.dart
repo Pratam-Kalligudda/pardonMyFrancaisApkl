@@ -1,7 +1,11 @@
 // main.dart
 
 import 'package:flutter/material.dart';
+import 'package:french_app/pages/account_settings_page.dart';
 import 'package:french_app/pages/audio_visual_test_page.dart';
+import 'package:french_app/pages/notification_setttings_page.dart';
+import 'package:french_app/pages/notificatons_page.dart';
+import 'package:french_app/pages/settings_page.dart';
 import 'package:french_app/pages/sign_in_page.dart';
 import 'package:french_app/pages/sign_up_page.dart';
 import 'package:french_app/pages/home_page.dart';
@@ -31,7 +35,7 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         theme: lightTheme,
         themeMode: ThemeMode.system,
-        initialRoute: '/audiovisual',
+        initialRoute: '/profile',
         routes: {
           '/': (context) => const WelcomePage(),
           '/signIn': (context) => const SignInPage(),
@@ -44,8 +48,12 @@ class MyApp extends StatelessWidget {
                 levelName: '',
               ),
           '/profile': (context) => const ProfilePage(),
-          // '/notifications': (context) => const NotificationsPage(),
+          '/notifications': (context) => const NotificationsPage(),
           '/audiovisual': (context) => const AudioVideoPage(),
+          '/settings': (context) => const SettingsPage(),
+          '/accountsettings': (context) => const AccountSettingsPage(),
+          '/notificationsettings': (context) => const NotificationsSettingsPage(),
+
         },
       ),
     );
