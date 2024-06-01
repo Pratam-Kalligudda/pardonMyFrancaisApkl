@@ -1,3 +1,5 @@
+// pages/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -18,10 +20,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _bioController = TextEditingController(text: 'Software Engineer');
   final TextEditingController _locationController = TextEditingController(text: 'New York, USA');
 
-  bool _isNameEditing = false;
-  bool _isEmailEditing = false;
-  bool _isBioEditing = false;
-  bool _isLocationEditing = false;
   bool _isLoading = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -73,10 +71,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() {
       _isLoading = false;
-      _isNameEditing = false;
-      _isEmailEditing = false;
-      _isBioEditing = false;
-      _isLocationEditing = false;
     });
   }
 
@@ -94,36 +88,36 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
 
-  // void _deleteAccount(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Delete Account'),
-  //         content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text('Cancel'),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () async {
-  //               // Perform deletion logic here (e.g., delete account from server or local storage)
-  //               // Once account is deleted, navigate back to sign-in page
-  //               final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //               await prefs.remove('token');
-  //               await prefs.remove('user');
-  //               Navigator.pushNamedAndRemoveUntil(context, '/signUp', (route) => false);
-  //             },
-  //             child: const Text('Delete'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  void _deleteAccount(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Perform deletion logic here (e.g., delete account from server or local storage)
+                // Once account is deleted, navigate back to sign-in page
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.remove('token');
+                await prefs.remove('user');
+                Navigator.pushNamedAndRemoveUntil(context, '/signUp', (route) => false);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -156,6 +150,158 @@ class _ProfilePageState extends State<ProfilePage> {
     return null;
   }
 
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password cannot be empty';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  }
+
+  Future<void> _changePassword(BuildContext context) async {
+    final _currentPasswordController = TextEditingController();
+    final _newPasswordController = TextEditingController();
+    final _confirmPasswordController = TextEditingController();
+    final _passwordFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: Form(
+            key: _passwordFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _currentPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Current Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: _validatePassword,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _newPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'New Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: _validatePassword,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm New Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value != _newPasswordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (_passwordFormKey.currentState?.validate() ?? false) {
+                  // Implement password change logic here
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  // Simulate a network request
+                  await Future.delayed(const Duration(seconds: 2));
+
+                  setState(() {
+                    _isLoading = false;
+                  });
+
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password changed successfully')),
+                  );
+                }
+              },
+              child: const Text('Change Password'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+ Widget _buildEditableField(String label, TextEditingController controller, String? Function(String?) validator) {
+  return GestureDetector(
+    onTap: () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit $label'),
+            content: TextFormField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: label,
+                border: OutlineInputBorder(),
+              ),
+              validator: validator,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (validator(controller.text) == null) {
+                    _saveChanges();
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+    child: InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+        filled: true,
+        fillColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
+      child: Text(
+        controller.text,
+        style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+      ),
+    ),
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,6 +319,12 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               _logout(context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              _deleteAccount(context);
             },
           ),
         ],
@@ -242,41 +394,20 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  _buildEditableField('Name', _nameController, Icons.person_outline, () async {
-                    if (!_isNameEditing && (_formKey.currentState?.validate() ?? false)) {
-                      await _saveChanges();
-                    }
-                    setState(() {
-                      _isNameEditing = !_isNameEditing;
-                    });
-                  }, _isNameEditing, _validateName),
+                  _buildEditableField('Name', _nameController, _validateName),
                   const SizedBox(height: 20),
-                  _buildEditableField('Email', _emailController, Icons.email_outlined, () async {
-                    if (!_isEmailEditing && (_formKey.currentState?.validate() ?? false)) {
-                      await _saveChanges();
-                    }
-                    setState(() {
-                      _isEmailEditing = !_isEmailEditing;
-                    });
-                  }, _isEmailEditing, _validateEmail),
+                  _buildEditableField('Email', _emailController, _validateEmail),
                   const SizedBox(height: 20),
-                  _buildEditableField('Bio', _bioController, Icons.info_outline, () async {
-                    if (!_isBioEditing && (_formKey.currentState?.validate() ?? false)) {
-                      await _saveChanges();
-                    }
-                    setState(() {
-                      _isBioEditing = !_isBioEditing;
-                    });
-                  }, _isBioEditing, _validateField),
+                  _buildEditableField('Bio', _bioController, _validateField),
                   const SizedBox(height: 20),
-                  _buildEditableField('Location', _locationController, Icons.location_on_outlined, () async {
-                    if (!_isLocationEditing && (_formKey.currentState?.validate() ?? false)) {
-                      await _saveChanges();
-                    }
-                    setState(() {
-                      _isLocationEditing = !_isLocationEditing;
-                    });
-                  }, _isLocationEditing, _validateField),
+                  _buildEditableField('Location', _locationController, _validateField),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      _changePassword(context);
+                    },
+                    child: const Text('Change Password'),
+                  ),
                 ],
               ),
             ),
@@ -309,59 +440,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
-  Widget _buildEditableField(String label, TextEditingController controller, IconData iconData, VoidCallback onPressed, bool isFieldEditing, String? Function(String?) validator) {
-    return GestureDetector(
-      onTap: () {
-        if (!isFieldEditing) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Edit $label'),
-                content: TextFormField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    labelText: label,
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: validator,
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (validator(controller.text) == null) {
-                        onPressed();
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-          filled: true,
-          fillColor: Theme.of(context).scaffoldBackgroundColor,
-        ),
-        child: Text(
-          controller.text,
-          style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
-        ),
-      ),
-    );
-  }
 }
 
+           
