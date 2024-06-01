@@ -1,3 +1,5 @@
+//pages/setting_pge.dart
+
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/account_settings_page.dart';
 import 'package:french_app/pages/notification_setttings_page.dart';
@@ -12,14 +14,13 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0, // Remove the shadow
+        elevation: 0,
         centerTitle: true,
       ),
       body: _buildSettingsContent(context),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: 2, // Current index for the settings page
         onTap: (index) {
-          // Handle navigation based on the index
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
@@ -38,30 +39,30 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildSettingsContent(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       children: [
         ListTile(
-          title: Text('Account Settings'),
-          leading: Icon(Icons.account_circle),
+          title: const Text('Account Settings'),
+          leading: const Icon(Icons.account_circle),
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AccountSettingsPage()),
+              MaterialPageRoute(builder: (context) => const AccountSettingsPage()),
             );
           },
         ),
-        Divider(),
+        const Divider(),
         ListTile(
-          title: Text('Notifications Settings'),
-          leading: Icon(Icons.notifications),
+          title: const Text('Notifications Settings'),
+          leading: const Icon(Icons.notifications),
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NotificationsSettingsPage()),
+              MaterialPageRoute(builder: (context) => const NotificationsSettingsPage()),
             );
           },
         ),
-        Divider(),
+        const Divider(),
         // Add more settings options as needed
       ],
     );

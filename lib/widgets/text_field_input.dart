@@ -24,7 +24,7 @@ class _TextFieldInputState extends State<TextFieldInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8), // Added margin for better spacing
+      margin: const EdgeInsets.symmetric(vertical: 8), 
       child: TextField(
         style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         controller: widget.textEditingController,

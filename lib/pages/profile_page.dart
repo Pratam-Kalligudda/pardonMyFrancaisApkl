@@ -1,3 +1,5 @@
+//pages/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/notificatons_page.dart';
 import 'package:image_picker/image_picker.dart';
@@ -84,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _handleNotificationsPress() {
       Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NotificationsPage()),
+              MaterialPageRoute(builder: (context) => const NotificationsPage()),
       );
   }
 
@@ -95,37 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
     await prefs.remove('user');
     Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
-
-  // void _deleteAccount(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Delete Account'),
-  //         content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text('Cancel'),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () async {
-  //               // Perform deletion logic here (e.g., delete account from server or local storage)
-  //               // Once account is deleted, navigate back to sign-in page
-  //               final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //               await prefs.remove('token');
-  //               await prefs.remove('user');
-  //               Navigator.pushNamedAndRemoveUntil(context, '/signUp', (route) => false);
-  //             },
-  //             child: const Text('Delete'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
@@ -164,7 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text('Profile'),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0, // Remove the shadow
+        elevation: 0,
         centerTitle: true,
         actions: [
           IconButton(

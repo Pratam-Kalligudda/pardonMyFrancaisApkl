@@ -58,7 +58,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
       }
     } catch (error) {
       print('Error fetching sublevels: $error');
-      rethrow; // Rethrow the error to handle it outside
+      rethrow;
     }
   }
 
@@ -259,7 +259,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
                             _showNextTestConfirmationDialog();
                           }
                         } else {
-                          // Show a message indicating the user to select an option
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Please select an option'),

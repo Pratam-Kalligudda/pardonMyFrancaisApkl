@@ -1,3 +1,5 @@
+//pages/account_settings_page.dart
+
 import 'package:flutter/material.dart';
 
 class AccountSettingsPage extends StatelessWidget {
@@ -9,7 +11,7 @@ class AccountSettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Account Settings'),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0, // Remove the shadow
+        elevation: 0,
         centerTitle: true,
       ),
       body: _buildAccountSettingsContent(context),
@@ -18,35 +20,35 @@ class AccountSettingsPage extends StatelessWidget {
 
   Widget _buildAccountSettingsContent(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       children: [
         ListTile(
-          title: Text('Change Username'),
-          subtitle: Text('Change your username'),
-          leading: Icon(Icons.person),
+          title: const Text('Change Username'),
+          subtitle: const Text('Change your username'),
+          leading: const Icon(Icons.person),
           onTap: () {
             _showChangeUsernameDialog(context);
           },
         ),
-        Divider(),
+        const Divider(),
         ListTile(
-          title: Text('Change Password'),
-          subtitle: Text('Change your password'),
-          leading: Icon(Icons.lock),
+          title: const Text('Change Password'),
+          subtitle: const Text('Change your password'),
+          leading: const Icon(Icons.lock),
           onTap: () {
             _showChangePasswordDialog(context);
           },
         ),
-        Divider(),
+        const Divider(),
         ListTile(
-          title: Text('Delete Account'),
-          subtitle: Text('Delete your account'),
-          leading: Icon(Icons.lock),
+          title: const Text('Delete Account'),
+          subtitle: const Text('Delete your account'),
+          leading: const Icon(Icons.lock),
           onTap: () {
             _showDeleteAccountDialog(context);
           },
         ),
-        Divider(),
+        const Divider(),
         // Add more settings options as needed
       ],
     );
@@ -59,19 +61,19 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Change Username'),
+          title: const Text('Change Username'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Current username: current_username'),
+              const Text('Current username: current_username'),
               TextField(
                 controller: newUsernameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Enter new username',
                 ),
                 obscureText: true,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
             ],
           ),
           actions: [
@@ -79,17 +81,16 @@ class AccountSettingsPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 // Implement logic to update username
                 String newUsername = newUsernameController.text;
-                // Process the new username
                 print('New Username: $newUsername');
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -106,29 +107,29 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Change Password'),
+          title: const Text('Change Password'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: currentPasswordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Enter current password',
                 ),
                 obscureText: true,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextField(
                 controller: newPasswordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Enter new password',
                 ),
                 obscureText: true,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextField(
                 controller: confirmNewPasswordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Confirm new password',
                 ),
                 obscureText: true,
@@ -140,7 +141,7 @@ class AccountSettingsPage extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -148,13 +149,12 @@ class AccountSettingsPage extends StatelessWidget {
                 String currentPassword = currentPasswordController.text;
                 String newPassword = newPasswordController.text;
                 String confirmNewPassword = confirmNewPasswordController.text;
-                // Process the password change
                 print('Current Password: $currentPassword');
                 print('New Password: $newPassword');
                 print('Confirm New Password: $confirmNewPassword');
                 Navigator.pop(context);
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         );
@@ -167,21 +167,21 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account?'),
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('No'),
+              child: const Text('No'),
             ),
             TextButton(
               onPressed: () {
                 // Implement logic to delete account
                 Navigator.pop(context);
               },
-              child: Text('Yes'),
+              child: const Text('Yes'),
             ),
           ],
         );

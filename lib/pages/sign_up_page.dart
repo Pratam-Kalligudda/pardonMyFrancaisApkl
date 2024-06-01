@@ -64,10 +64,8 @@ class _SignUpPageState extends State<SignUpPage> {
         _isLoading = false;
       });
 
-      // Navigate to the home screen or perform other actions
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     } else {
-      // Handle errors
       setState(() {
         _isLoading = false;
       });

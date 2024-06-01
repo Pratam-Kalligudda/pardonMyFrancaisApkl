@@ -41,19 +41,18 @@ class MyApp extends StatelessWidget {
           '/signIn': (context) => const SignInPage(),
           '/signUp': (context) => const SignUpPage(),
           '/home': (context) => const HomePage(),
+          '/profile': (context) => const ProfilePage(),
+          '/notifications': (context) => const NotificationsPage(),
+          '/settings': (context) => const SettingsPage(),
+          '/accountsettings': (context) => const AccountSettingsPage(),
+          '/notificationsettings': (context) => const NotificationsSettingsPage(),
           '/lessonDetail': (context) =>
               const LessonDetailPage(lessonName: '', levelName: ''),
           '/mcqTest': (context) => const MCQTestPage(
                 lessonName: '',
                 levelName: '',
               ),
-          '/profile': (context) => const ProfilePage(),
-          '/notifications': (context) => const NotificationsPage(),
           '/audiovisual': (context) => const AudioVideoPage(),
-          '/settings': (context) => const SettingsPage(),
-          '/accountsettings': (context) => const AccountSettingsPage(),
-          '/notificationsettings': (context) => const NotificationsSettingsPage(),
-
         },
       ),
     );

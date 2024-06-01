@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
+import 'package:french_app/pages/notificatons_page.dart';
 
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
@@ -20,9 +21,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// Inside the onPressed callback of your logout button/icon
 void _logout(BuildContext context) async {
-  // Navigate back to the welcome page and clear the navigation stack
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.remove('token');
   await prefs.remove('user');
@@ -77,7 +76,10 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              // Add your notifications logic here
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotificationsPage()),
+            );
             },
           ),
           IconButton(
@@ -93,12 +95,12 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           setState(() {
             if (index == _currentIndex) {
-              // Clicked on the same tab, do nothing or handle accordingly
+
             } else {
               _currentIndex = index;
               switch (index) {
                 case 0:
-                  Navigator.pushNamed(context, '/home');
+                  // Do nothing as it's the current page
                   break;
                 case 1:
                   Navigator.pushNamed(context, '/profile');

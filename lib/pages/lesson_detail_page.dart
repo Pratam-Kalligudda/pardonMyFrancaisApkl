@@ -1,10 +1,12 @@
 // pages/lesson_detail_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:french_app/pages/notificatons_page.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/lesson_detail_tile.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LessonDetailPage extends StatelessWidget {
   final String lessonName;
@@ -16,6 +18,13 @@ class LessonDetailPage extends StatelessWidget {
     required this.lessonName,
   }) : super(key: key);
 
+  void _logout(BuildContext context) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('token');
+  await prefs.remove('user');
+  Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+}
+
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? arguments =
@@ -26,32 +35,36 @@ class LessonDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(levelName),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0, // Remove the shadow
+        elevation: 0,
         centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
-              // Handle notifications button press
+              Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotificationsPage()),
+            );
             },
             icon: const Icon(Icons.notifications),
           ),
           IconButton(
             onPressed: () {
-              // Handle logout button press
+              _logout(context);
             },
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 0, // Set the appropriate index for this page
+        currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
-            // Navigate to Home Page
             Navigator.pushNamed(context, '/home');
           } else if (index == 1) {
-            // Navigate to Profile Page
             Navigator.pushNamed(context, '/profile');
+          }
+          else{
+            Navigator.pushNamed(context, '/settings');
           }
         },
       ),
@@ -103,14 +116,14 @@ class LessonDetailPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(
-            context,
-            '/mcqTest',
-            arguments: {
-              'lessonName':
-                  lessonName, // Assuming you want to pass lessonName as well
-              'levelName': levelName,
-            },
-          );
+                          context,
+                          '/mcqTest',
+                          arguments: {
+                            'lessonName':
+                                lessonName,
+                            'levelName': levelName,
+                          },
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,

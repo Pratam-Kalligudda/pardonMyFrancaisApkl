@@ -82,14 +82,12 @@ class _LoginScreenState extends State<SignInPage> {
         print('User:  $userd');
         print('Token: $tokend');
 
-        // Navigate to the home screen
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
         final String errorMessage = jsonDecode(response.body)['error'];
         _showSignInSnackbar(context, errorMessage);
       }
     } catch (e) {
-      // Handle network errors
       print('Error: $e');
       _showSignInSnackbar(
           context, 'Failed to sign in. Please try again later.');

@@ -29,7 +29,7 @@ class LevelTile extends StatelessWidget {
             '/lessonDetail',
             arguments: {
               'lessonName':
-                  subName, // Assuming you want to pass lessonName as well
+                  subName,
               'levelName': name,
             },
           );
