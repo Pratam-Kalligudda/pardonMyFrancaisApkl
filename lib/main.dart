@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         theme: lightTheme,
         themeMode: ThemeMode.system,
-        initialRoute: '/profile',
+        initialRoute: '/audiovisual',
         routes: {
           '/': (context) => const WelcomePage(),
           '/signIn': (context) => const SignInPage(),
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
                 lessonName: '',
                 levelName: '',
               ),
-          '/audiovisual': (context) => const AudioVideoPage(),
+          '/audiovisual': (context) => AudioVisualTestPage(),
         },
       ),
     );

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:french_app/pages/recording_page.dart'; // To use Future.delayed for simulating network request
 
-class AudioVideoPage extends StatelessWidget {
-  const AudioVideoPage({Key? key}) : super(key: key);
+class AudioVisualTestPage extends StatelessWidget {
+  const AudioVisualTestPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recording'),
+        title: const Text('Pronunciation Test'),
       ),
       body: Stack(
         children: [
-          Center(
+          const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -40,30 +41,41 @@ class AudioVideoPage extends StatelessWidget {
                   'Pronunciation',
                   style: TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
                 ),
+                SizedBox(height: 100.0),
+                Center(
+                  child: Text(
+                    'As a final part of completing the lesson we will check your pronunciation and tell you how accurate your pronunciation is',
+                    style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ),
-          Positioned(
-            bottom: 100.0, // Adjust the top distance as needed
+          const Positioned(
+            bottom: 160.0,
             left: 0,
             right: 0,
             child: Center(
               child: Text(
-                'Please click the button below to start recording:',
+                'Please click the button below to start recording',
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
           ),
           Positioned(
-            bottom: 40.0, // Adjust the bottom distance as needed
+            bottom: 100.0,
             left: 0,
             right: 0,
             child: Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Add your record button functionality here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RecordingPage()),
+                  );
                 },
-                child: Text('Record'),
+                child: const Text('Record'),
               ),
             ),
           ),
