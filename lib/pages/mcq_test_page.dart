@@ -30,7 +30,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
   void initState() {
     super.initState();
     _futureSubLevels = _fetchSubLevels();
-    selectedOptions = List<int>.filled(4, -1);
+    selectedOptions = List<int>.filled(5, -1);
   }
 
   Future<List<SubLevels>> _fetchSubLevels() async {
@@ -170,7 +170,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 questions = subLevels[0].questions;
                 print(questions!.length);
                 print("currentQuestionIndex: $currentQuestionIndex");
-                print(questions![3].options.length);
+                // print(questions![3].options.length);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -207,7 +207,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         itemCount:
                             questions![currentQuestionIndex].options.length,
                         itemBuilder: (context, index) {
-                          final option = questions![currentQuestionIndex].options[index];
+                          final option =
+                              questions![currentQuestionIndex].options;
+                          print(option);
                           print("index:$index");
                           print(
                               questions![currentQuestionIndex].options[index]);
@@ -218,10 +220,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
-                                color: selectedOptions[currentQuestionIndex] ==
-                                        index
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.surface,
+                                // color: selectedOptions[currentQuestionIndex] ==
+                                //         index
+                                // //    ? Theme.of(context).colorScheme.primary
+                                //     : Theme.of(context).colorScheme.surface,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.primary,

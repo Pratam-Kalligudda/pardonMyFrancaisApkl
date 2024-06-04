@@ -36,7 +36,8 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/signUp'),
+      Uri.parse(
+          'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/signUp'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -47,10 +48,11 @@ class _SignUpPageState extends State<SignUpPage> {
       }),
     );
     print(response.statusCode);
+    print(response.body);
     if (response.statusCode == 201) {
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       final String token = responseData['token'];
-      final Map<String, dynamic> userData = responseData['user'];
+      final Map<String, dynamic> userData = responseData['userResponse'];
 
       // Save token and user details to shared preferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -125,12 +127,14 @@ class _SignUpPageState extends State<SignUpPage> {
             CustomButton(
               text: "Sign Up",
               onPressed: () {
-                if (_detailsAreNotEntered(_usernameController, _emailController, _passwordController)) {
+                if (_detailsAreNotEntered(_usernameController, _emailController,
+                    _passwordController)) {
                   _showSignUpSnackbar(context);
                   return; // Return to prevent further execution
                 }
                 // Proceed with signUp process
-                signUp(_usernameController.text, _emailController.text, _passwordController.text);
+                signUp(_usernameController.text, _emailController.text,
+                    _passwordController.text);
               },
               isLoading: _isLoading,
             ),
@@ -169,13 +173,19 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-bool _detailsAreNotEntered(TextEditingController usernameController, TextEditingController emailController, TextEditingController passwordController) {
-  return usernameController.text.isEmpty || emailController.text.isEmpty || passwordController.text.isEmpty;
+bool _detailsAreNotEntered(
+    TextEditingController usernameController,
+    TextEditingController emailController,
+    TextEditingController passwordController) {
+  return usernameController.text.isEmpty ||
+      emailController.text.isEmpty ||
+      passwordController.text.isEmpty;
 }
 
 void _showSignUpSnackbar(BuildContext context) {
   const snackBar = SnackBar(
-    content: Text('Please enter your username, email, and password to sign up.'),
+    content:
+        Text('Please enter your username, email, and password to sign up.'),
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

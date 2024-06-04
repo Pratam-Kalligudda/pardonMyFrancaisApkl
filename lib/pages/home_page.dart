@@ -77,9 +77,10 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.notifications),
             onPressed: () {
               Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NotificationsPage()),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const NotificationsPage()),
+              );
             },
           ),
           IconButton(
@@ -95,7 +96,6 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           setState(() {
             if (index == _currentIndex) {
-
             } else {
               _currentIndex = index;
               switch (index) {
@@ -114,80 +114,82 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-                children: [
-                  const TextSpan(text: "Hi, "),
-                  TextSpan(
-                    text: _user?.username,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                  children: [
+                    const TextSpan(text: "Hi, "),
+                    TextSpan(
+                      text: _user?.username,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              "Date Joined: ${_user?.registrationDate}",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onBackground,
-                fontSize: 16,
+              const SizedBox(height: 5),
+              Text(
+                "Date Joined: ${_user?.registrationDate}",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onBackground,
+                  fontSize: 16,
+                ),
               ),
-            ),
-            const SizedBox(height: 40),
-            Text(
-              'Levels',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+              const SizedBox(height: 40),
+              Text(
+                'Levels',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            const Divider(),
-            const SizedBox(height: 20),
-            FutureBuilder<List<Levels>>(
-              future: fetchData(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  List<Levels> levels = snapshot.data!;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: levels.length,
-                    itemBuilder: (context, index) {
-                      var level = levels[index];
-                      return LevelTile(
-                        name: level.levelName,
-                        subName: level.subtitle,
-                        index: index + 1,
-                      );
-                    },
-                  );
-                } else {
-                  return const Center(child: Text('No data available'));
-                }
-              },
-            )
-          ],
+              const SizedBox(
+                height: 16,
+              ),
+              const Divider(),
+              const SizedBox(height: 20),
+              FutureBuilder<List<Levels>>(
+                future: fetchData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    List<Levels> levels = snapshot.data!;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: levels.length,
+                      itemBuilder: (context, index) {
+                        var level = levels[index];
+                        return LevelTile(
+                          name: level.levelName,
+                          subName: level.subtitle,
+                          index: index + 1,
+                        );
+                      },
+                    );
+                  } else {
+                    return const Center(child: Text('No data available'));
+                  }
+                },
+              )
+            ],
+          ),
         ),
       ),
     );
