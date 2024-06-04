@@ -22,6 +22,8 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def flutterVersion = flutterVersionName
+
 android {
     namespace "com.example.french_app"
     compileSdkVersion flutter.compileSdkVersion
@@ -66,4 +68,26 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.core:core-ktx:$flutterVersion"
+    implementation "com.google.firebase:firebase-analytics"
+    implementation "com.google.firebase:firebase-auth"
+    implementation "com.google.firebase:firebase-firestore"
+    implementation 'com.android.support:multidex:1.0.3'
+    
+    // Add the Flutter dependencies below
+    implementation 'com.google.android.gms:play-services-auth:19.2.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.google.firebase:firebase-analytics-ktx:19.0.1"
+    implementation "com.google.firebase:firebase-auth-ktx:21.0.1"
+    implementation "com.google.firebase:firebase-firestore-ktx:23.0.3"
+    implementation 'com.google.firebase:firebase-storage-ktx:20.0.0'
+    
+    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    
+    implementation 'com.google.firebase:firebase-messaging:22.0.0'
+}
