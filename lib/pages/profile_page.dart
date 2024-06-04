@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/notificatons_page.dart';
 import 'package:image_picker/image_picker.dart';
@@ -5,6 +7,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key});
@@ -14,21 +17,24 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   final int _completedLessons = 2;
   int _stars = 1;
   int _totalCoins = 1;
 
-  final TextEditingController _nameController =
-      TextEditingController(text: 'John Doe');
-  final TextEditingController _emailController =
-      TextEditingController(text: 'johndoe@example.com');
-  final TextEditingController _bioController =
-      TextEditingController(text: 'Software Engineer');
-  final TextEditingController _locationController =
-      TextEditingController(text: 'New York, USA');
+  // final TextEditingController _nameController =
+  //     TextEditingController(text: 'John Doe');
+  // final TextEditingController _emailController =
+  //     TextEditingController(text: 'johndoe@example.com');
+  // final TextEditingController _bioController =
+  //     TextEditingController(text: 'Software Engineer');
+  // final TextEditingController _locationController =
+  //     TextEditingController(text: 'New York, USA');
 
   bool _isNameEditing = false;
-  bool _isEmailEditing = false;
+  // bool _isEmailEditing = false;
   bool _isBioEditing = false;
   bool _isLocationEditing = false;
   bool _isLoading = false;
@@ -39,6 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
 
   late List<Map<String, String>> _achievements;
+
+
 
   List<Map<String, String>> _initializeAchievements() {
     return [
@@ -110,8 +118,53 @@ class _ProfilePageState extends State<ProfilePage> {
 Future<void> _loadData() async {
   await _loadStars();
   await _loadTotalCoins();
+  await _loadUserDetails();
   // _displayAchievements(_completedLessons);
 }
+
+Future<void> _loadUserDetails() async {
+  try {
+    final jwtToken = await _getJwtToken();
+    if (jwtToken == null) {
+      throw Exception('JWT token not found');
+    }
+
+    final username = await _getCurrentUsername(); // Await the username retrieval
+
+    final response = await http.get(
+      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/userProfile?username=$username'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $jwtToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> userData = json.decode(response.body);
+      setState(() {
+        _nameController.text = userData['name'];
+        _bioController.text = userData['bio'];
+        _locationController.text = userData['location'];
+      });
+    } else if (response.statusCode == 404) {
+      print('User profile not found for username: $username');
+    } else {
+      print('Failed to load user profile data. Status code: ${response.statusCode}');
+    }
+  } catch (error) {
+    print('Error loading user profile data: $error');
+  }
+}
+
+Future<String?> _getCurrentUsername() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? username = prefs.getString('username');
+  if (username == null || username.isEmpty) {
+    throw Exception('Username not found in SharedPreferences');
+  }
+  return username;
+}
+
 
 // void _displayAchievements(int completedLessons) {
 //   showDialog(
@@ -246,18 +299,62 @@ Future<void> _saveTotalCoins() async {
     }
   }
 
+  Future<void> _updateProfile() async {
+  try {
+    final jwtToken = await _getJwtToken();
+    if (jwtToken == null) {
+      throw Exception('JWT token not found');
+    }
+
+    final response = await http.post(
+      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/updateProfile'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $jwtToken', // Include JWT token in the request headers
+      },
+      body: jsonEncode(<String, dynamic>{
+        'updates': [
+          {'field': 'name', 'value': _nameController.text},
+          {'field': 'bio', 'value': _bioController.text},
+          {'field': 'location', 'value': _locationController.text},
+          // Add other fields as needed
+        ]
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Successfully updated profile
+      // You can show a success message or handle it as needed
+      print('Profile updated successfully');
+    } else {
+      // Failed to update profile
+      // You can show an error message or handle it as needed
+      print('Failed to update profile. Status code: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Handle network errors or other exceptions
+    print('Error updating profile: $error');
+    rethrow;
+  }
+}
+
+Future<String?> _getJwtToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
   Future<void> _saveChanges() async {
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate a network request
-    await Future.delayed(const Duration(seconds: 2));
+    // Save changes to the backend
+    await _updateProfile();
 
     setState(() {
       _isLoading = false;
       _isNameEditing = false;
-      _isEmailEditing = false;
+      // _isEmailEditing = false;
       _isBioEditing = false;
       _isLocationEditing = false;
     });
@@ -288,16 +385,16 @@ Future<void> _saveTotalCoins() async {
     return null;
   }
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email cannot be empty';
-    }
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Enter a valid email';
-    }
-    return null;
-  }
+  // String? _validateEmail(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return 'Email cannot be empty';
+  //   }
+  //   final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+  //   if (!emailRegex.hasMatch(value)) {
+  //     return 'Enter a valid email';
+  //   }
+  //   return null;
+  // }
 
   String? _validateField(String? value) {
     if (value == null || value.isEmpty) {
@@ -396,7 +493,7 @@ Future<void> _saveTotalCoins() async {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  _buildEditableField('Name', _nameController, Icons.person_outline, () async {
+                   _buildEditableField('Name', _nameController, Icons.person_outline, () async {
                     if (!_isNameEditing && (_formKey.currentState?.validate() ?? false)) {
                       await _saveChanges();
                     }
@@ -404,15 +501,6 @@ Future<void> _saveTotalCoins() async {
                       _isNameEditing = !_isNameEditing;
                     });
                   }, _isNameEditing, _validateName),
-                  const SizedBox(height: 20),
-                  _buildEditableField('Email', _emailController, Icons.email_outlined, () async {
-                    if (!_isEmailEditing && (_formKey.currentState?.validate() ?? false)) {
-                      await _saveChanges();
-                    }
-                    setState(() {
-                      _isEmailEditing = !_isEmailEditing;
-                    });
-                  }, _isEmailEditing, _validateEmail),
                   const SizedBox(height: 20),
                   _buildEditableField('Bio', _bioController, Icons.info_outline, () async {
                     if (!_isBioEditing && (_formKey.currentState?.validate() ?? false)) {
@@ -432,23 +520,28 @@ Future<void> _saveTotalCoins() async {
                     });
                   }, _isLocationEditing, _validateField),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return _buildAchievementsDialog(_completedLessons);
-                        },
-                      );
-                    },
-                    child: const Text(
+                  // _buildEditableField('Email', _emailController, Icons.email_outlined, () async {
+                  //   if (!_isEmailEditing && (_formKey.currentState?.validate() ?? false)) {
+                  //     await _saveChanges();
+                  //   }
+                  //   setState(() {
+                  //     _isEmailEditing = !_isEmailEditing;
+                  //   });
+                  // }, _isEmailEditing, _validateEmail),
+                  // const SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                  Divider(),
+                  _buildStars(),
+                  _buildTotalCoins(), 
+                  const SizedBox(height: 20),
+                  Divider(),
+                  Center(
+                    child: Text(
                       'Achievements',
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _buildStars(),
-                  _buildTotalCoins(), // Add this line to display total coins
+                  _buildAchievementsGrid(_completedLessons), // Add this line to display total coins
                 ],
               ),
             ),
@@ -480,6 +573,7 @@ Future<void> _saveTotalCoins() async {
       ),
     );
   }
+
 
   Widget _buildEditableField(String label, TextEditingController controller, IconData iconData, VoidCallback onPressed, bool isFieldEditing, String? Function(String?) validator) {
     return GestureDetector(
@@ -535,74 +629,73 @@ Future<void> _saveTotalCoins() async {
     );
   }
 
- Widget _buildAchievementsDialog(int completedLessons) {
+ Widget _buildAchievementsGrid(int completedLessons) {
   List<Map<String, String>> filteredAchievements = _achievements
-    .where((achievement) {
-      String title = achievement['title']!;
-      // Split the title by "Completed" or "Trophy" and take the first part
-      String lessonPart = title.split(' Completed').first;
-      // Try parsing the lesson number
-      int? lessonNumber = int.tryParse(lessonPart.split(' ').last);
-      // Return true if the lesson number is not null and less than or equal to completedLessons
-      return lessonNumber != null && lessonNumber <= completedLessons;
-    })
-    .toList();
+      .where((achievement) {
+    String title = achievement['title']!;
+    // Split the title by "Completed" or "Trophy" and take the first part
+    String lessonPart = title.split(' Completed').first;
+    // Try parsing the lesson number
+    int? lessonNumber = int.tryParse(lessonPart.split(' ').last);
+    // Return true if the lesson number is not null and less than or equal to completedLessons
+    return lessonNumber != null && lessonNumber <= completedLessons;
+  }).toList();
 
-  if (filteredAchievements.isEmpty) {
-    return AlertDialog(
-      title: const Text('Achievements'),
-      content: const Text('No achievements yet.'),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Close'),
-        ),
-      ],
-    );
-  }
-
-  return AlertDialog(
-    title: const Text('Achievements'),
-    content: SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          for (final achievement in filteredAchievements)
-            ListTile(
-              leading: Image.asset(
-                achievement['icon']!,
-                height: 30,
-                width: 30,
-              ),
-              title: Text(
-                achievement['title']!,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Text(
-                achievement['description']!,
-                style: const TextStyle(
-                  color: Colors.grey,
-                ),
+  return Container(
+    height: 200, // Adjust this value as needed
+    child: GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: filteredAchievements.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              filteredAchievements[index]['icon']!,
+              width: 50,
+              height: 50,
+            ),
+            SizedBox(height: 5),
+            Text(
+              filteredAchievements[index]['title'] ?? '',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
             ),
-        ],
-      ),
+          ],
+        );
+      },
     ),
-    actions: <Widget>[
-      TextButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: const Text('Close'),
-      ),
-    ],
   );
 }
 
-
+Widget _buildAchievementTile(Map<String, String> achievement) {
+  return ListTile(
+    leading: Image.asset(
+      achievement['icon']!,
+      height: 40,
+      width: 40,
+    ),
+    title: Text(
+      achievement['title']!,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    subtitle: Text(
+      achievement['description']!,
+      style: const TextStyle(
+        color: Colors.grey,
+      ),
+    ),
+  );
+}
   Widget _buildStars() {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 10), // Adjust vertical spacing here
@@ -612,7 +705,7 @@ Future<void> _saveTotalCoins() async {
         const Icon(Icons.star, color: Colors.amber), // Star icon
         const SizedBox(width: 5),
         Text(
-          'Stars: $_stars',
+          'Tokens: $_stars',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],

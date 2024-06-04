@@ -1,9 +1,9 @@
 // pages/welcome_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final navigatorKeyProvider = Provider((ref) => GlobalKey<NavigatorState>());
+// final navigatorKeyProvider = Provider((ref) => GlobalKey<NavigatorState>());
 
 
 class WelcomePage extends StatelessWidget {

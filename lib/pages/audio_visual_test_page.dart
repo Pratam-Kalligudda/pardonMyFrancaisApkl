@@ -1,46 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:french_app/pages/recording_page.dart'; // To use Future.delayed for simulating network request
+import 'package:french_app/pages/recording_page.dart';
+import 'package:french_app/providers/guidebook_provider.dart';
+import 'package:provider/provider.dart';
 
 class AudioVisualTestPage extends StatelessWidget {
   const AudioVisualTestPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final levelProvider = Provider.of<LevelProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pronunciation Test'),
       ),
       body: Stack(
         children: [
-          const Center(
+          Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(height: 50.0),
                 Text(
-                  'Pronunciation Test',
+                  'French Pronunciation Test',
                   style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 30.0),
-                Text(
-                  'French Word',
-                  style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                ),
+                // Display fetched data from the backend
+                if (levelProvider.levels.isNotEmpty)
+                  Text(
+                    levelProvider.levels[0].guidebookContent.isNotEmpty
+                        ? levelProvider.levels[0].guidebookContent[0].frenchWord
+                        : 'French Word',
+                    style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+                  )
+                else
+                  Text('French Word'),
                 SizedBox(height: 10.0),
-                Text(
-                  'Translation',
-                  style: TextStyle(fontSize: 18.0),
-                ),
+                if (levelProvider.levels.isNotEmpty)
+                  Text(
+                    levelProvider.levels[0].guidebookContent.isNotEmpty
+                        ? levelProvider.levels[0].guidebookContent[0].englishTranslation
+                        : 'English Translation',
+                    style: TextStyle(fontSize: 18.0),
+                  )
+                else
+                  Text('English Translation'),
                 SizedBox(height: 5.0),
-                Text(
-                  'Meaning',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 5.0),
-                Text(
-                  'Pronunciation',
-                  style: TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
-                ),
+                if (levelProvider.levels.isNotEmpty)
+                  Text(
+                    levelProvider.levels[0].guidebookContent.isNotEmpty
+                        ? levelProvider.levels[0].guidebookContent[0].frenchPronunciation
+                        : 'French Pronunciation',
+                    style: TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
+                  )
+                else
+                  Text('French Pronunciation'),
                 SizedBox(height: 100.0),
                 Center(
                   child: Text(
@@ -52,7 +67,7 @@ class AudioVisualTestPage extends StatelessWidget {
               ],
             ),
           ),
-          const Positioned(
+          Positioned(
             bottom: 160.0,
             left: 0,
             right: 0,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +24,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
   List<Questions>? questions;
   late List<int> selectedOptions;
   late String levelName;
+  bool allQuestionsAnswered = false;
+  bool isLastQuestion = false;
 
   @override
   void initState() {
@@ -35,7 +36,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   Future<List<SubLevels>> _fetchSubLevels() async {
     try {
-      print("object");
       final jwtToken = await _getJwtToken();
       if (jwtToken == null) {
         throw Exception('JWT token not found');
@@ -48,9 +48,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
           'Authorization': 'Bearer $jwtToken',
         },
       );
-      print(response.statusCode);
       if (response.statusCode == 200) {
-        print(response.body);
         List<dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse.map((json) => SubLevels.fromJson(json)).toList();
       } else {
@@ -77,11 +75,43 @@ class _MCQTestPageState extends State<MCQTestPage> {
     setState(() {
       if (currentQuestionIndex < questions!.length - 1) {
         currentQuestionIndex++;
-        print("currentQuestionIndex Updated: $currentQuestionIndex");
       } else {
-        _showNextTestConfirmationDialog();
+        submitAnswer();
       }
     });
+  }
+
+  void submitAnswer() {
+    String selectedOption =
+        questions![currentQuestionIndex].options[selectedOptions[currentQuestionIndex]];
+    bool isCorrect = selectedOption == questions![currentQuestionIndex].correctOption;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isCorrect ? 'Correct!' : 'Incorrect. Try again!'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (isCorrect) {
+                  nextQuestion();
+                  if (currentQuestionIndex == questions!.length - 1) {
+                    isLastQuestion = true;
+                    allQuestionsAnswered = true;
+                  }
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Reset selected options
+    selectedOptions[currentQuestionIndex] = -1;
   }
 
   Future<void> _showNextTestConfirmationDialog() {
@@ -113,7 +143,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform the action to move to the next test
+                Navigator.pushNamed(context, '/audiovisual');
               },
               child: const Text(
                 'Yes',
@@ -127,7 +157,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform any other action you want here
               },
               child: const Text(
                 'No',
@@ -143,6 +172,14 @@ class _MCQTestPageState extends State<MCQTestPage> {
       },
     );
   }
+
+
+  void checkAndShowConfirmationDialog() {
+  if (allQuestionsAnswered && isLastQuestion) {
+      _showNextTestConfirmationDialog();
+      allQuestionsAnswered = false; // Reset to false after showing the dialog
+    }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -168,9 +205,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
               } else if (snapshot.hasData) {
                 final subLevels = snapshot.data as List<SubLevels>;
                 questions = subLevels[0].questions;
-                print(questions!.length);
-                print("currentQuestionIndex: $currentQuestionIndex");
-                // print(questions![3].options.length);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -204,15 +238,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     Expanded(
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount:
-                            questions![currentQuestionIndex].options.length,
+                        itemCount: questions![currentQuestionIndex].options.length,
                         itemBuilder: (context, index) {
-                          final option =
-                              questions![currentQuestionIndex].options;
-                          print(option);
-                          print("index:$index");
-                          print(
-                              questions![currentQuestionIndex].options[index]);
                           return InkWell(
                             onTap: () {
                               selectOption(index);
@@ -220,24 +247,20 @@ class _MCQTestPageState extends State<MCQTestPage> {
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
-                                // color: selectedOptions[currentQuestionIndex] ==
-                                //         index
-                                // //    ? Theme.of(context).colorScheme.primary
-                                //     : Theme.of(context).colorScheme.surface,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.primary,
                                   width: 2,
                                 ),
+                                color: selectedOptions[currentQuestionIndex] == index
+                                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                                    : Colors.transparent,
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                               child: Text(
                                 questions![currentQuestionIndex].options[index],
                                 style: TextStyle(
-                                  color: selectedOptions[
-                                              currentQuestionIndex] ==
-                                          index
+                                  color: selectedOptions[currentQuestionIndex] == index
                                       ? Theme.of(context).colorScheme.onPrimary
                                       : Theme.of(context).colorScheme.onSurface,
                                   fontSize: 16,
@@ -253,13 +276,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     ElevatedButton(
                       onPressed: () {
                         if (selectedOptions[currentQuestionIndex] != -1) {
-                          if (currentQuestionIndex < questions!.length - 1) {
-                            print("trying nextQuestion function");
-                            nextQuestion();
-                          } else {
-                            print("trying nexTextConfirmationDialog function");
-                            _showNextTestConfirmationDialog();
-                          }
+                          checkAndShowConfirmationDialog();
+                          submitAnswer();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -269,19 +287,15 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       child: Text(
-                        currentQuestionIndex < questions!.length - 1
-                            ? 'Next'
-                            : 'Submit',
+                        'Submit',
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),
