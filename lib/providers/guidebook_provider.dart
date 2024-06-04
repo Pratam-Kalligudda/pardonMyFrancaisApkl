@@ -33,7 +33,7 @@ class LevelProvider with ChangeNotifier {
       String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
         Uri.parse(
-            'http://ec2-44-211-62-237.compute-1.amazonaws.com/api/guidebook/$encodedLevelName'),
+            'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/guidebook/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },

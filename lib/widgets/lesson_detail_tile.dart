@@ -24,7 +24,7 @@ class LessonDetailTile extends StatelessWidget {
       // Fetch the pronunciation audio
       final response = await http.get(
         Uri.parse(
-            'http://ec2-44-211-62-237.compute-1.amazonaws.com/api/audio/$phrase'),
+            'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/audio/$phrase'),
       );
       if (response.statusCode == 200) {
         // Play the audio

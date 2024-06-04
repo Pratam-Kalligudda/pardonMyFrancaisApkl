@@ -53,7 +53,7 @@ class _LoginScreenState extends State<SignInPage> {
     });
 
     final Uri url =
-        Uri.parse('http://ec2-44-211-62-237.compute-1.amazonaws.com/api/login');
+        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/logIn');
     final Map<String, String> requestBody = {
       'username': username,
       'password': password,

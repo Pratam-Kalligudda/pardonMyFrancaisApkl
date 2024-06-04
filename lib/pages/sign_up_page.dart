@@ -36,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     final response = await http.post(
-      Uri.parse('http://ec2-44-211-62-237.compute-1.amazonaws.com/api/signup'),
+      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/signUp'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

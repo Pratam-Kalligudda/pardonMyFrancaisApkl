@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         darkTheme: darkTheme,
         theme: lightTheme,
         themeMode: ThemeMode.system,
-        initialRoute: '/audiovisual',
+        initialRoute: '/',
         routes: {
           '/': (context) => const WelcomePage(),
           '/signIn': (context) => const SignInPage(),
