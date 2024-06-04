@@ -1,12 +1,12 @@
 // widgets/lesson_detail_tile.dart
 
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
-class LessonDetailTile extends StatelessWidget {
+class LessonDetailTile extends StatefulWidget {
   final String phrase;
   final String pronunciation;
   final String translation;
@@ -18,25 +18,62 @@ class LessonDetailTile extends StatelessWidget {
     required this.translation,
   }) : super(key: key);
 
+  @override
+  State<LessonDetailTile> createState() => _LessonDetailTileState();
+}
+
+class _LessonDetailTileState extends State<LessonDetailTile> {
+  late FlutterTts flutterTts;
+  bool isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    flutterTts = FlutterTts();
+    flutterTts.setStartHandler(() {
+      setState(() {
+        isPlaying = true;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isPlaying = false;
+      });
+    });
+
+    flutterTts.setErrorHandler((err) {
+      setState(() {
+        isPlaying = false;
+      });
+      print('Error playing audio: $err');
+    });
+  }
+
   Future<void> _fetchAndPlayPronunciation() async {
-    print("object");
-    try {
-      // Fetch the pronunciation audio
-      final response = await http.get(
-        Uri.parse(
-            'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/audio/$phrase'),
-      );
-      if (response.statusCode == 200) {
-        // Play the audio
-        Uint8List audio = response.bodyBytes;
-        AudioPlayer audioPlayer = AudioPlayer();
-        await audioPlayer.play(BytesSource(audio));
-      } else {
-        throw Exception('Failed to load pronunciation audio');
-      }
-    } catch (e) {
-      print('Error playing audio: $e');
-    }
+    // print("object");
+    // try {
+    //   // Fetch the pronunciation audio
+    //   final response = await http.get(
+    //     Uri.parse(
+    //         'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/audio/$phrase'),
+    //   );
+    //   if (response.statusCode == 200) {
+    //     // Play the audio
+    //     Uint8List audio = response.bodyBytes;
+    //     AudioPlayer audioPlayer = AudioPlayer();
+    //     await audioPlayer.play(BytesSource(audio));
+    //   } else {
+    //     throw Exception('Failed to load pronunciation audio');
+    //   }
+    // } catch (e) {
+    //   print('Error playing audio: $e');
+    // }
+    await flutterTts.setVolume(1.0);
+        await flutterTts.setSpeechRate(0.5);
+        await flutterTts.setPitch(1.0);
+        await flutterTts.awaitSpeakCompletion(true);
+        await flutterTts.speak(widget.pronunciation);
   }
 
   @override
@@ -55,13 +92,13 @@ class LessonDetailTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildText(phrase, FontWeight.bold, 20, context),
+              _buildText(widget.phrase, FontWeight.bold, 20, context),
               const SizedBox(height: 8),
-              _buildText('Pronunciation: $pronunciation', FontWeight.normal, 16,
+              _buildText('Pronunciation: ${widget.pronunciation}', FontWeight.normal, 16,
                   context),
               const SizedBox(height: 4),
               _buildText(
-                  'Translation: $translation', FontWeight.normal, 16, context),
+                  'Translation: ${widget.translation}', FontWeight.normal, 16, context),
             ],
           ),
         ),

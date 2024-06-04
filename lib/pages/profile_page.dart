@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/notificatons_page.dart';
 import 'package:image_picker/image_picker.dart';
@@ -129,10 +128,10 @@ Future<void> _loadUserDetails() async {
       throw Exception('JWT token not found');
     }
 
-    final username = await _getCurrentUsername(); // Await the username retrieval
+    // final username = await _getCurrentUsername(); // Await the username retrieval
 
     final response = await http.get(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/userProfile?username=$username'),
+      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/user'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $jwtToken',
@@ -147,7 +146,7 @@ Future<void> _loadUserDetails() async {
         _locationController.text = userData['location'];
       });
     } else if (response.statusCode == 404) {
-      print('User profile not found for username: $username');
+      print('User profile not found for username');
     } else {
       print('Failed to load user profile data. Status code: ${response.statusCode}');
     }
@@ -156,14 +155,14 @@ Future<void> _loadUserDetails() async {
   }
 }
 
-Future<String?> _getCurrentUsername() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String? username = prefs.getString('username');
-  if (username == null || username.isEmpty) {
-    throw Exception('Username not found in SharedPreferences');
-  }
-  return username;
-}
+// Future<String?> _getCurrentUsername() async {
+//   final SharedPreferences prefs = await SharedPreferences.getInstance();
+//   final String? username = prefs.getString('username');
+//   if (username == null || username.isEmpty) {
+//     throw Exception('Username not found in SharedPreferences');
+//   }
+//   return username;
+// }
 
 
 // void _displayAchievements(int completedLessons) {

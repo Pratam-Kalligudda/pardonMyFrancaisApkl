@@ -1,24 +1,24 @@
-// providers/navigation_providers.dart
+// // providers/navigation_providers.dart
 
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
-class BottomNavBarProvider extends ChangeNotifier {
-  int _currentIndex = 0;
-  final List<String> _navigationStack = ['WelcomePage'];
+// class BottomNavBarProvider extends ChangeNotifier {
+//   int _currentIndex = 0;
+//   final List<String> _navigationStack = ['WelcomePage'];
 
-  int get currentIndex => _currentIndex;
-  List<String> get navigationStack => _navigationStack;
+//   int get currentIndex => _currentIndex;
+//   List<String> get navigationStack => _navigationStack;
 
-  void updateIndex(int newIndex, String pageName) {
-    _currentIndex = newIndex;
-    _navigationStack.add(pageName);
-    notifyListeners();
-  }
+//   void updateIndex(int newIndex, String pageName) {
+//     _currentIndex = newIndex;
+//     _navigationStack.add(pageName);
+//     notifyListeners();
+//   }
 
-  void popNavigationStack() {
-    if (_navigationStack.isNotEmpty) {
-      _navigationStack.removeLast();
-      notifyListeners();
-    }
-  }
-}
+//   void popNavigationStack() {
+//     if (_navigationStack.isNotEmpty) {
+//       _navigationStack.removeLast();
+//       notifyListeners();
+//     }
+//   }
+// }

@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:french_app/pages/recording_page.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class AudioVisualTestPage extends StatelessWidget {
-  const AudioVisualTestPage({Key? key}) : super(key: key);
+  AudioVisualTestPage({Key? key}) : super(key: key);
+
+  final FlutterTts flutterTts = FlutterTts();
+
+  Future<void> _speakPhrase(String phrase) async {
+  await flutterTts.setLanguage('fr-FR'); // Set language to French
+  await flutterTts.setPitch(1.0); // Set pitch (1.0 is default)
+  await flutterTts.speak(phrase);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +65,17 @@ class AudioVisualTestPage extends StatelessWidget {
                   )
                 else
                   Text('French Pronunciation'),
+                SizedBox(height: 100.0),
+                IconButton(
+                  icon: Icon(Icons.volume_up),
+                  onPressed: () {
+                    _speakPhrase(levelProvider.levels.isNotEmpty
+                        ? levelProvider.levels[0].guidebookContent.isNotEmpty
+                            ? levelProvider.levels[0].guidebookContent[0].frenchPronunciation
+                            : 'French Pronunciation'
+                        : 'French Pronunciation');
+                  },
+                ),
                 SizedBox(height: 100.0),
                 Center(
                   child: Text(
