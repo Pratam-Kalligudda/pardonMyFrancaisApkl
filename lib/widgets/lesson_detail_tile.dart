@@ -6,16 +6,21 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 
+
 class LessonDetailTile extends StatefulWidget {
   final String phrase;
   final String pronunciation;
   final String translation;
+  final bool mcqCompleted;
+  final bool pronunciationCompleted;
 
   const LessonDetailTile({
     Key? key,
     required this.phrase,
     required this.pronunciation,
     required this.translation,
+    this.mcqCompleted = false,
+    this.pronunciationCompleted = false,
   }) : super(key: key);
 
   @override
@@ -74,6 +79,7 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
         await flutterTts.setPitch(1.0);
         await flutterTts.awaitSpeakCompletion(true);
         await flutterTts.speak(widget.pronunciation);
+        
   }
 
   @override
@@ -106,15 +112,40 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     );
   }
 
-  Widget _buildText(String text, FontWeight fontWeight, double fontSize,
-      BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: Theme.of(context).colorScheme.onSurface,
+  Widget _buildText(
+  String text,
+  FontWeight fontWeight,
+  double fontSize,
+  BuildContext context,
+) {
+  return Row(
+    children: [
+      Expanded(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
       ),
-    );
-  }
+      if (text.contains('Pronunciation:')) // Add pronunciation icon
+        Icon(
+          Icons.volume_up,
+          color: widget.pronunciationCompleted
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).disabledColor,
+        ),
+      if (text.contains('Translation:')) // Add MCQ icon
+        Icon(
+          Icons.quiz,
+          color: widget.mcqCompleted
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).disabledColor,
+        ),
+    ],
+  );
+}
+
 }

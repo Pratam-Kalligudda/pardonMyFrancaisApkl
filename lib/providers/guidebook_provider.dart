@@ -10,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LevelProvider with ChangeNotifier {
   List<Levels> _levels = [];
   late String _levelName;
+  Map<String, bool> _mcqProgress = {};
+  Map<String, bool> _pronunciationProgress = {};
 
   String get levelName => _levelName;
 
@@ -48,5 +50,40 @@ class LevelProvider with ChangeNotifier {
     } catch (error) {
       rethrow;
     }
+  }
+  Future<void> _loadProgress() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _mcqProgress = (prefs.getString('mcqProgress') != null)
+        ? Map<String, bool>.from(json.decode(prefs.getString('mcqProgress')!))
+        : {};
+    _pronunciationProgress = (prefs.getString('pronunciationProgress') != null)
+        ? Map<String, bool>.from(json.decode(prefs.getString('pronunciationProgress')!))
+        : {};
+  }
+
+  Future<void> _saveProgress() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('mcqProgress', json.encode(_mcqProgress));
+    prefs.setString('pronunciationProgress', json.encode(_pronunciationProgress));
+  }
+
+  void updateMcqProgress(String levelName, bool completed) {
+    _mcqProgress[levelName] = completed;
+    _saveProgress();
+    notifyListeners();
+  }
+
+  void updatePronunciationProgress(String levelName, bool completed) {
+    _pronunciationProgress[levelName] = completed;
+    _saveProgress();
+    notifyListeners();
+  }
+
+  bool isMcqCompleted(String levelName) {
+    return _mcqProgress[levelName] ?? false;
+  }
+
+  bool isPronunciationCompleted(String levelName) {
+    return _pronunciationProgress[levelName] ?? false;
   }
 }
