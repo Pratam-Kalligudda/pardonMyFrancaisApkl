@@ -23,7 +23,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
   late Future<List<SubLevels>> _futureSubLevels;
   int currentQuestionIndex = 0;
   List<Questions>? questions;
-  late List<int> selectedOptions;
+  List<int> selectedOptions =[];
   late String levelName;
   bool allQuestionsAnswered = false;
   bool isLastQuestion = false;
@@ -35,7 +35,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
   void initState() {
     super.initState();
     _futureSubLevels = _fetchSubLevels();
-    selectedOptions = List<int>.filled(5, -1);
+    // selectedOptions = List<int>.filled(5, -1);
   }
 
   Future<List<SubLevels>> _fetchSubLevels() async {
@@ -220,6 +220,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
               } else if (snapshot.hasData) {
                 final subLevels = snapshot.data as List<SubLevels>;
                 questions = subLevels[0].questions;
+                selectedOptions = List<int>.filled(questions!.length, -1);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
