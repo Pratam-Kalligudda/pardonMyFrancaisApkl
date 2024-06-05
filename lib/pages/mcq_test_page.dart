@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:http/http.dart' as http;
@@ -27,9 +26,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
   late String levelName;
   bool allQuestionsAnswered = false;
   bool isLastQuestion = false;
-  int currentCombo = 0;
-  int maxCombo = 0;
-  bool isTestAnswered = false;
 
   @override
   void initState() {
@@ -100,21 +96,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
               onPressed: () {
                 Navigator.of(context).pop();
                 if (isCorrect) {
-                  currentCombo++;
-                  maxCombo = max(maxCombo, currentCombo); // Update max combo if needed
                   nextQuestion();
                   if (currentQuestionIndex == questions!.length - 1) {
                     isLastQuestion = true;
                     allQuestionsAnswered = true;
-                    isTestAnswered = true; // Set test as answered when last question is answered
                   }
-                } else {
-                  currentCombo = 0; // Reset combo if incorrect
-                }
-                print('Current Combo: $currentCombo');
-                print('Max Combo: $maxCombo');
-                if (isTestAnswered) {
-                  print('MCQ Test Answered');
                 }
               },
               child: const Text('OK'),
@@ -127,7 +113,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
     // Reset selected options
     selectedOptions[currentQuestionIndex] = -1;
   }
-
 
   Future<void> _showNextTestConfirmationDialog() {
     return showDialog<void>(
@@ -190,11 +175,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
 
   void checkAndShowConfirmationDialog() {
-  if (allQuestionsAnswered && isLastQuestion) {
+    if (allQuestionsAnswered && isLastQuestion) {
       _showNextTestConfirmationDialog();
       allQuestionsAnswered = false; // Reset to false after showing the dialog
     }
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -219,109 +204,113 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
                 final subLevels = snapshot.data as List<SubLevels>;
-                questions = subLevels[0].questions;
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Multiple Choice Questions',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Select the correct option for the question from the given options',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Text(
-                      questions![currentQuestionIndex].question,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: questions![currentQuestionIndex].options.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              selectOption(index);
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 2,
-                                ),
-                                color: selectedOptions[currentQuestionIndex] == index
-                                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                                    : Colors.transparent,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                              child: Text(
-                                questions![currentQuestionIndex].options[index],
-                                style: TextStyle(
-                                  color: selectedOptions[currentQuestionIndex] == index
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSurface,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (selectedOptions[currentQuestionIndex] != -1) {
-                          checkAndShowConfirmationDialog();
-                          submitAnswer();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please select an option'),
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: Text(
-                        'Submit',
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ],
-                );
+                questions = subLevels.expand((sublevel) => sublevel.questions).toList();
+                return _buildQuestionView();
               }
             }
             return Container(); // Placeholder widget
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildQuestionView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Multiple Choice Questions',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Select the correct option for the question from the given options',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 30),
+        Text(
+          questions![currentQuestionIndex].question,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: questions![currentQuestionIndex].options.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () {
+                  selectOption(index);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                    ),
+                    color: selectedOptions[currentQuestionIndex] == index
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                        : Colors.transparent,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  child: Text(
+                    questions![currentQuestionIndex].options[index],
+                    style: TextStyle(
+                      color: selectedOptions[currentQuestionIndex] == index
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            if (selectedOptions[currentQuestionIndex] != -1) {
+              checkAndShowConfirmationDialog();
+              submitAnswer();
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please select an option'),
+                ),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Text(
+            'Submit',
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+      ],
     );
   }
 }
