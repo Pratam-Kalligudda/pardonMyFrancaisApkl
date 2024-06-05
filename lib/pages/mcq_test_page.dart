@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:http/http.dart' as http;
@@ -26,6 +27,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
   late String levelName;
   bool allQuestionsAnswered = false;
   bool isLastQuestion = false;
+  int currentCombo = 0;
+  int maxCombo = 0;
+  bool isTestAnswered = false;
 
   @override
   void initState() {
@@ -96,11 +100,21 @@ class _MCQTestPageState extends State<MCQTestPage> {
               onPressed: () {
                 Navigator.of(context).pop();
                 if (isCorrect) {
+                  currentCombo++;
+                  maxCombo = max(maxCombo, currentCombo); // Update max combo if needed
                   nextQuestion();
                   if (currentQuestionIndex == questions!.length - 1) {
                     isLastQuestion = true;
                     allQuestionsAnswered = true;
+                    isTestAnswered = true; // Set test as answered when last question is answered
                   }
+                } else {
+                  currentCombo = 0; // Reset combo if incorrect
+                }
+                print('Current Combo: $currentCombo');
+                print('Max Combo: $maxCombo');
+                if (isTestAnswered) {
+                  print('MCQ Test Answered');
                 }
               },
               child: const Text('OK'),
@@ -113,6 +127,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     // Reset selected options
     selectedOptions[currentQuestionIndex] = -1;
   }
+
 
   Future<void> _showNextTestConfirmationDialog() {
     return showDialog<void>(

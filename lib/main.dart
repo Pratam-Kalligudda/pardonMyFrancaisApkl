@@ -27,8 +27,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => LevelProvider(),
+    return MultiProvider(
+      providers: [ // Provide the CurrentLevelProvider
+        ChangeNotifierProvider(create: (_) => LevelProvider()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Your App',

@@ -14,6 +14,26 @@ import 'package:french_app/widgets/level_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+class Achievement {
+  final String id;
+  final String name;
+  final String description;
+
+  Achievement({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  factory Achievement.fromJson(Map<String, dynamic> json) {
+    return Achievement(
+      id: json['_id']['\$oid'],
+      name: json['name'],
+      description: json['description'],
+    );
+  }
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -31,12 +51,65 @@ void _logout(BuildContext context) async {
 class _HomePageState extends State<HomePage> {
   User? _user;
   List<Levels> guidebookData = [];
-
+  DateTime? _startTime;
+  int _dailyStreak = 1;
+  List<Achievement> _achievements = [];
+  
   @override
   void initState() {
     super.initState();
     loadUserDetails();
     fetchData();
+    startSession();
+    calculateDailyStreak();
+  }
+
+  @override
+  void dispose() {
+    endSession(); // Call endSession when the widget is disposed
+    super.dispose();
+  }
+
+  Future<void> startSession() async {
+    _startTime = DateTime.now();
+    print('Session started at $_startTime');
+  }
+
+  Future<void> endSession() async {
+    if (_startTime != null) {
+      final endTime = DateTime.now();
+      final sessionDuration = endTime.difference(_startTime!);
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final totalTime = prefs.getInt('total_time') ?? 0;
+      final updatedTotalTime = totalTime + sessionDuration.inSeconds;
+      await prefs.setInt('total_time', updatedTotalTime);
+
+      print('Session ended at $endTime');
+      print('Session duration: ${sessionDuration.inSeconds} seconds');
+      print('Total time spent using the app: ${Duration(seconds: updatedTotalTime)}');
+    }
+  }
+
+  Future<void> calculateDailyStreak() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final lastAccessDate = prefs.getString('last_access_date');
+    final currentDate = DateTime.now().toString().split(' ')[0]; // Get current date in yyyy-MM-dd format
+
+    if (lastAccessDate == null || lastAccessDate != currentDate) {
+      // If last access date is null or different from current date, reset streak to 1
+      setState(() {
+        _dailyStreak = 1;
+      });
+      await prefs.setString('last_access_date', currentDate); // Update last access date
+    } else {
+      // Increment streak if accessed on the same day
+      setState(() {
+        _dailyStreak++;
+      });
+    }
+
+    print('Daily streak: $_dailyStreak');
   }
 
   Future<void> loadUserDetails() async {
@@ -67,6 +140,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   int _currentIndex = 0;
+  String? _currentLevel;
+
+  void setCurrentLevel(String levelName) {
+    setState(() {
+      _currentLevel = levelName;
+    });
+    print('Current Level: $_currentLevel');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,6 +262,7 @@ class _HomePageState extends State<HomePage> {
                           name: level.levelName,
                           subName: level.subtitle,
                           index: index + 1,
+                          onTap: () => setCurrentLevel(level.levelName),
                         );
                       },
                     );

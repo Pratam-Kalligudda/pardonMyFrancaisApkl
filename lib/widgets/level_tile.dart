@@ -8,12 +8,14 @@ class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
   final int index;
+  final VoidCallback onTap;
 
   const LevelTile({
     Key? key,
     required this.name,
     required this.subName,
     required this.index,
+    required this.onTap,
   }) : super(key: key);
 
   @override
@@ -28,11 +30,11 @@ class LevelTile extends StatelessWidget {
             context,
             '/lessonDetail',
             arguments: {
-              'lessonName':
-                  subName,
+              'lessonName': subName,
               'levelName': name,
             },
           );
+          onTap();
         },
         child: Container(
           padding: const EdgeInsets.all(18),
