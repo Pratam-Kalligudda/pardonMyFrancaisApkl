@@ -4,20 +4,32 @@ import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-class AudioVisualTestPage extends StatelessWidget {
+class AudioVisualTestPage extends StatefulWidget {
   AudioVisualTestPage({Key? key}) : super(key: key);
+
+  @override
+  State<AudioVisualTestPage> createState() => _AudioVisualTestPageState();
+}
+
+class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
+  bool testAnswered = false;
 
   final FlutterTts flutterTts = FlutterTts();
 
   Future<void> _speakPhrase(String phrase) async {
   await flutterTts.setLanguage('fr-FR'); // Set language to French
-  await flutterTts.setPitch(1.0); // Set pitch (1.0 is default)
+  await flutterTts.setPitch(1.0);
+  await flutterTts.setSpeechRate(0.5); // Set pitch (1.0 is default)
   await flutterTts.speak(phrase);
 }
 
   @override
   Widget build(BuildContext context) {
     final levelProvider = Provider.of<LevelProvider>(context, listen: false);
+
+    if (testAnswered) {
+      print('The audio visual test was answered.'); // Print in the console that the test was answered
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -109,6 +121,9 @@ class AudioVisualTestPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (context) => const RecordingPage()),
                   );
+                  testAnswered = true;
+                  // Print to console that the test was answered
+                  print('Test was answered: $testAnswered');
                 },
                 child: const Text('Record'),
               ),

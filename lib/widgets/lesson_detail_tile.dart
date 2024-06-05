@@ -74,11 +74,12 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     // } catch (e) {
     //   print('Error playing audio: $e');
     // }
+    await flutterTts.setLanguage('fr-FR');
     await flutterTts.setVolume(1.0);
         await flutterTts.setSpeechRate(0.5);
         await flutterTts.setPitch(1.0);
         await flutterTts.awaitSpeakCompletion(true);
-        await flutterTts.speak(widget.pronunciation);
+        await flutterTts.speak(widget.phrase);
         
   }
 
