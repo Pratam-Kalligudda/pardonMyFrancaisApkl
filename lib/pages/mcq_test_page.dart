@@ -23,7 +23,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
   late Future<List<SubLevels>> _futureSubLevels;
   int currentQuestionIndex = 0;
   List<Questions>? questions;
-  List<int> selectedOptions =[];
+  List<int> selectedOptions = [];
   late String levelName;
   bool allQuestionsAnswered = false;
   bool isLastQuestion = false;
@@ -73,6 +73,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     setState(() {
       selectedOptions[currentQuestionIndex] = index;
     });
+    print("selected option after selecting a option $selectedOptions");
   }
 
   void nextQuestion() {
@@ -86,9 +87,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
   }
 
   void submitAnswer() {
-    String selectedOption =
-        questions![currentQuestionIndex].options[selectedOptions[currentQuestionIndex]];
-    bool isCorrect = selectedOption == questions![currentQuestionIndex].correctOption;
+    String selectedOption = questions![currentQuestionIndex]
+        .options[selectedOptions[currentQuestionIndex]];
+    bool isCorrect =
+        selectedOption == questions![currentQuestionIndex].correctOption;
 
     showDialog(
       context: context,
@@ -101,12 +103,14 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 Navigator.of(context).pop();
                 if (isCorrect) {
                   currentCombo++;
-                  maxCombo = max(maxCombo, currentCombo); // Update max combo if needed
+                  maxCombo =
+                      max(maxCombo, currentCombo); // Update max combo if needed
                   nextQuestion();
                   if (currentQuestionIndex == questions!.length - 1) {
                     isLastQuestion = true;
                     allQuestionsAnswered = true;
-                    isTestAnswered = true; // Set test as answered when last question is answered
+                    isTestAnswered =
+                        true; // Set test as answered when last question is answered
                   }
                 } else {
                   currentCombo = 0; // Reset combo if incorrect
@@ -125,9 +129,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     );
 
     // Reset selected options
-    selectedOptions[currentQuestionIndex] = -1;
   }
-
 
   Future<void> _showNextTestConfirmationDialog() {
     return showDialog<void>(
@@ -188,13 +190,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
     );
   }
 
-
   void checkAndShowConfirmationDialog() {
-  if (allQuestionsAnswered && isLastQuestion) {
+    if (allQuestionsAnswered && isLastQuestion) {
       _showNextTestConfirmationDialog();
       allQuestionsAnswered = false; // Reset to false after showing the dialog
     }
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +222,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 final subLevels = snapshot.data as List<SubLevels>;
                 questions = subLevels[0].questions;
                 selectedOptions = List<int>.filled(questions!.length, -1);
+                print(selectedOptions);
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -254,7 +256,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
                     Expanded(
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: questions![currentQuestionIndex].options.length,
+                        itemCount:
+                            questions![currentQuestionIndex].options.length,
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
@@ -268,15 +271,22 @@ class _MCQTestPageState extends State<MCQTestPage> {
                                   color: Theme.of(context).colorScheme.primary,
                                   width: 2,
                                 ),
-                                color: selectedOptions[currentQuestionIndex] == index
-                                    ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                                color: selectedOptions[currentQuestionIndex] ==
+                                        index
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.3)
                                     : Colors.transparent,
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 16, horizontal: 16),
                               child: Text(
                                 questions![currentQuestionIndex].options[index],
                                 style: TextStyle(
-                                  color: selectedOptions[currentQuestionIndex] == index
+                                  color: selectedOptions[
+                                              currentQuestionIndex] ==
+                                          index
                                       ? Theme.of(context).colorScheme.onPrimary
                                       : Theme.of(context).colorScheme.onSurface,
                                   fontSize: 16,
@@ -303,9 +313,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),

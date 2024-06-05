@@ -52,13 +52,13 @@ class _LoginScreenState extends State<SignInPage> {
       _isLoading = true;
     });
 
-    final Uri url =
-        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/logIn');
+    final Uri url = Uri.parse(
+        'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/logIn');
     final Map<String, String> requestBody = {
       'username': username,
       'password': password,
     };
-
+    print(requestBody);
     try {
       final http.Response response = await http.post(
         url,
@@ -67,12 +67,15 @@ class _LoginScreenState extends State<SignInPage> {
         },
         body: jsonEncode(requestBody),
       );
-
+      print(response.statusCode);
+      print(1);
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
+        print(2);
         final String token = responseData['token'];
-        final Map<String, dynamic> userData = responseData['user'];
-
+        print(responseData['user']);
+        final Map<String, dynamic> userData = responseData['userResponse'];
+        print(4);
         // Save token and user details to shared preferences
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
