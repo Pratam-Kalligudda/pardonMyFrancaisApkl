@@ -399,8 +399,8 @@ Future<String?> _getJwtToken() async {
     if (value == null || value.isEmpty) {
       return 'This field cannot be empty';
     }
-    if (value.length < 5) {
-      return 'Field must be at least 5 characters long';
+    if (value.length < 2) {
+      return 'Field must be at least 2 characters long';
     }
     return null;
   }

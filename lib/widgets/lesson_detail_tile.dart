@@ -128,20 +128,20 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
           ),
         ),
       ),
-      if (text.contains('Pronunciation:')) // Add pronunciation icon
-        Icon(
-          Icons.volume_up,
-          color: widget.pronunciationCompleted
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).disabledColor,
-        ),
-      if (text.contains('Translation:')) // Add MCQ icon
-        Icon(
-          Icons.quiz,
-          color: widget.mcqCompleted
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).disabledColor,
-        ),
+      // if (text.contains('Pronunciation:')) // Add pronunciation icon
+      //   Icon(
+      //     Icons.volume_up,
+      //     color: widget.pronunciationCompleted
+      //         ? Theme.of(context).colorScheme.primary
+      //         : Theme.of(context).disabledColor,
+      //   ),
+      // if (text.contains('Translation:')) // Add MCQ icon
+      //   Icon(
+      //     Icons.quiz,
+      //     color: widget.mcqCompleted
+      //         ? Theme.of(context).colorScheme.primary
+      //         : Theme.of(context).disabledColor,
+      //   ),
     ],
   );
 }

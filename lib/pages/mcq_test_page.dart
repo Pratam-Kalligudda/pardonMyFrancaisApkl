@@ -28,7 +28,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
   bool isLastQuestion = false;
   bool isMcqTestAnswered = false;
   int correctAnswers = 0;
-  int score = 0;
+  double score = 0;
+  bool allCorrect = true;
 
   @override
   void initState() {
@@ -94,6 +95,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
     bool isCorrect =
         selectedOption == questions![currentQuestionIndex].correctOption;
 
+        if (!isCorrect) {
+          allCorrect = false;
+        }
+
     print("Selected option: $selectedOption");
     print("Is correct: $isCorrect");
 
@@ -112,9 +117,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 Navigator.of(context).pop();
                 if (isCorrect) {
                   correctAnswers++;
+                  score += 100 / questions!.length;
                 }
-
-                score = correctAnswers * 25;
                 print('Correct Answers: $correctAnswers');
                 print('Score: $score');
 
@@ -192,11 +196,54 @@ class _MCQTestPageState extends State<MCQTestPage> {
   //   );
   // }
 
+  Future<void> sendScoreToServer() async {
+    final jwtToken = await _getJwtToken();
+    if (jwtToken == null) {
+      throw Exception('JWT token not found');
+    }
+    int currentLevel = int.parse(levelName);
+    
+    final requestData = {
+        "current_level": currentLevel, 
+        "level_scores": {
+          "$currentLevel": score,
+        },
+        "allQuestionsRight": allCorrect,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/updateUserProgress'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: jsonEncode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        print('Score successfully sent to server');
+      } else {
+        print('Failed to send score to server: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error sending score to server: $error');
+    }
+  }
+
+
   void checkAndShowConfirmationDialog() {
     if (selectedOptions.every((element) => element != -1)) {
       // _showNextTestConfirmationDialog();
       allQuestionsAnswered = true;
-      Future.delayed(Duration(seconds: 2), () { // Reset to true after showing the dialog
+      if (allCorrect) {
+        allCorrect = true;
+        print('All questions were answered correctly.');
+      } else {
+        print('Not all questions were answered correctly.');
+      }
+      sendScoreToServer(); 
+      Future.delayed(Duration(seconds: 3), () { // Reset to true after showing the dialog
       Navigator.of(context).pop();
       Navigator.pushNamed(context, '/audiovisual');
       });

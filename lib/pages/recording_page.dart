@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
-import 'dart:async';// To use Future.delayed for simulating network request
+import 'dart:async';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 
 class RecordingPage extends StatefulWidget {
@@ -29,7 +29,6 @@ class _RecordingPageState extends State<RecordingPage> {
   Future<void> initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      // Filter only the front camera
       final frontCamera = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front);
 
       _controller = CameraController(
@@ -74,7 +73,6 @@ class _RecordingPageState extends State<RecordingPage> {
   }
 
   Future<void> extractAudioAndSend(String videoPath) async {
-    // Extract audio from the recorded video
     final flutterFFmpeg = FlutterFFmpeg();
     final outputAudioPath = videoPath.replaceAll('.mp4', '.mp3');
     final arguments = ['-i', videoPath, '-vn', '-acodec', 'copy', outputAudioPath];
@@ -86,24 +84,20 @@ class _RecordingPageState extends State<RecordingPage> {
       return;
     }
 
-    // Read the extracted audio file
     final audioFile = File(outputAudioPath);
 
-    // Send the audio file to the endpoint
     try {
-      final response = await http.post(
-        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/upload'),
-        body: {'audio': audioFile.readAsBytesSync()},
-      );
-      
+      var request = http.MultipartRequest('POST', Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/upload'));
+      request.files.add(await http.MultipartFile.fromPath('file', outputAudioPath));
+
+      var response = await request.send();
+
       if (response.statusCode == 200) {
-        // Receive accuracy score from the endpoint
-        setState(() {
-          _accuracyScore = double.parse(response.body);
+        setState(() async {
+          _accuracyScore = double.parse(await response.stream.bytesToString());
           _accuracyDisplayed = true;
         });
 
-        // Show the result in a dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -155,7 +149,7 @@ class _RecordingPageState extends State<RecordingPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (!_isRecording  && !_accuracyDisplayed)
+                      if (!_isRecording && !_accuracyDisplayed)
                         IconButton(
                           icon: const Icon(Icons.fiber_manual_record),
                           iconSize: 70,
@@ -171,17 +165,17 @@ class _RecordingPageState extends State<RecordingPage> {
                         ),
                       if (_isRecording || (!_isRecording && !_controller.value.isRecordingVideo))
                         IconButton(
-                              icon: const Icon(Icons.cancel),
-                              iconSize: 70,
-                              color: Colors.grey,
-                              onPressed: () {
-                                _controller.stopVideoRecording();
-                                setState(() {
-                                  _isRecording = false;
-                                });
-                                Navigator.pop(context); // Go back to previous page
-                              },
-                            ),
+                          icon: const Icon(Icons.cancel),
+                          iconSize: 70,
+                          color: Colors.grey,
+                          onPressed: () {
+                            _controller.stopVideoRecording();
+                            setState(() {
+                              _isRecording = false;
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
                     ],
                   ),
                 ),
