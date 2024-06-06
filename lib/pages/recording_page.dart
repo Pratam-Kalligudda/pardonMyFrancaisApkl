@@ -6,8 +6,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';// To use Future.delayed for simulating network request
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 
-
-
 class RecordingPage extends StatefulWidget {
   const RecordingPage({Key? key}) : super(key: key);
 
