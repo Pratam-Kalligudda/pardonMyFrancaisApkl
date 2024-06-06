@@ -6,8 +6,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/text_field_input.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+
+class SignUpProvider extends ChangeNotifier {
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+}
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -30,61 +41,20 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
-  Future<void> signUp(String username, String email, String password) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final response = await http.post(
-      Uri.parse(
-          'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/signUp'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'email': email,
-        'username': username,
-        'password': password,
-      }),
-    );
-    print(response.statusCode);
-    print(response.body);
-    if (response.statusCode == 201) {
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      final String token = responseData['token'];
-      final Map<String, dynamic> userData = responseData['userResponse'];
-
-      // Save token and user details to shared preferences
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      await prefs.setString('user', jsonEncode(userData));
-      String userd = prefs.getString('user')!;
-      String tokend = prefs.getString('token')!;
-      print('User:  $userd');
-      print('Token: $tokend');
-      setState(() {
-        _isLoading = false;
-      });
-
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
-      throw Exception('Failed to sign up');
-    }
-  }
-
-  @override
+   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+    return ChangeNotifierProvider(
+      create: (_) => SignUpProvider(),
+      child: Scaffold(
+        body: Container(
+          padding: const EdgeInsets.all(16),
+          width: double.infinity,
+          child: Consumer<SignUpProvider>(
+            builder: (context, provider, _) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
             RichText(
               text: TextSpan(
                 style: TextStyle(
@@ -125,19 +95,17 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             const SizedBox(height: 60),
             CustomButton(
-              text: "Sign Up",
-              onPressed: () {
-                if (_detailsAreNotEntered(_usernameController, _emailController,
-                    _passwordController)) {
-                  _showSignUpSnackbar(context);
-                  return; // Return to prevent further execution
-                }
-                // Proceed with signUp process
-                signUp(_usernameController.text, _emailController.text,
-                    _passwordController.text);
-              },
-              isLoading: _isLoading,
-            ),
+                    text: "Sign Up",
+                    onPressed: () {
+                      if (_detailsAreNotEntered()) {
+                        _showSignUpSnackbar(context);
+                        return;
+                      }
+                      provider.setLoading(true); // Set loading to true
+                      signUp(context);
+                    },
+                    isLoading: provider.isLoading, // Use provider's isLoading value
+                  ),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -167,25 +135,70 @@ class _SignUpPageState extends State<SignUpPage> {
               ],
             ),
           ],
-        ),
+        );
+      },
       ),
-    );
-  }
-}
-
-bool _detailsAreNotEntered(
-    TextEditingController usernameController,
-    TextEditingController emailController,
-    TextEditingController passwordController) {
-  return usernameController.text.isEmpty ||
-      emailController.text.isEmpty ||
-      passwordController.text.isEmpty;
-}
-
-void _showSignUpSnackbar(BuildContext context) {
-  const snackBar = SnackBar(
-    content:
-        Text('Please enter your username, email, and password to sign up.'),
+    ),
+  ),
   );
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  bool _detailsAreNotEntered() {
+    return _usernameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty;
+  }
+
+  void _showSignUpSnackbar(BuildContext context) {
+    const snackBar = SnackBar(
+      content:
+          Text('Please enter your username, email, and password to sign up.'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> signUp(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await http.post(
+      Uri.parse(
+          'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/signUp'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': _emailController.text,
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      }),
+    );
+    print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final String token = responseData['token'];
+      final Map<String, dynamic> userData = responseData['userResponse'];
+
+      // Save token and user details to shared preferences
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+      await prefs.setString('user', jsonEncode(userData));
+      String userd = prefs.getString('user')!;
+      String tokend = prefs.getString('token')!;
+      print('User:  $userd');
+      print('Token: $tokend');
+      setState(() {
+        _isLoading = false;
+      });
+
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+      throw Exception('Failed to sign up');
+    }
+  }
 }

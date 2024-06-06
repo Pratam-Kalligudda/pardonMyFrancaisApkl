@@ -1,8 +1,9 @@
 // models/user.dart
 
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class User {
+class User with ChangeNotifier {
   final String username;
   final String email;
   final String registrationDate;

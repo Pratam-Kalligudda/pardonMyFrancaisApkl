@@ -1,10 +1,7 @@
 // widgets/lesson_detail_tile.dart
 
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:http/http.dart' as http;
-import 'package:audioplayers/audioplayers.dart';
 
 
 class LessonDetailTile extends StatefulWidget {

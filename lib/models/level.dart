@@ -2,11 +2,13 @@
 
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
 List<Levels> levelsFromJson(String str) => List<Levels>.from(json.decode(str).map((x) => Levels.fromJson(x)));
 
 String levelsToJson(List<Levels> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class Levels {
+class Levels with ChangeNotifier {
     String levelName;
     String subtitle;
     List<GuidebookContent> guidebookContent;

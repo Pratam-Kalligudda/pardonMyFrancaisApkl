@@ -1,16 +1,10 @@
-// pages/home_page.dart
-
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
 import 'package:french_app/pages/notificatons_page.dart';
-
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,69 +35,61 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-void _logout(BuildContext context) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('token');
-  await prefs.remove('user');
-  Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
-}
-
 class _HomePageState extends State<HomePage> {
   User? _user;
-  List<Levels> guidebookData = [];
   DateTime? _startTime;
   int _dailyStreak = 1;
-  List<Achievement> _achievements = [];
-  
+  int _currentIndex = 0;
+  String? _currentLevel;
+  List<Levels> guidebookData = [];
+
   @override
   void initState() {
     super.initState();
-    loadUserDetails();
-    fetchData();
-    startSession();
-    calculateDailyStreak();
+    _startSession();
+    _loadUserDetails();
+    _fetchData();
+    _calculateDailyStreak();
   }
 
   @override
   void dispose() {
-    endSession(); // Call endSession when the widget is disposed
+    _endSession();
     super.dispose();
   }
 
-  Future<void> startSession() async {
+  // Methods related to session management
+  Future<void> _startSession() async {
     _startTime = DateTime.now();
     print('Session started at $_startTime');
   }
 
-  Future<void> endSession() async {
+  Future<void> _endSession() async {
     if (_startTime != null) {
       final endTime = DateTime.now();
       final sessionDuration = endTime.difference(_startTime!);
-
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final totalTime = prefs.getInt('total_time') ?? 0;
       final updatedTotalTime = totalTime + sessionDuration.inSeconds;
       await prefs.setInt('total_time', updatedTotalTime);
-
       print('Session ended at $endTime');
       print('Session duration: ${sessionDuration.inSeconds} seconds');
       print('Total time spent using the app: ${Duration(seconds: updatedTotalTime)}');
     }
   }
 
-  Future<void> calculateDailyStreak() async {
+  // Method to calculate daily streak
+  Future<void> _calculateDailyStreak() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final lastAccessDate = prefs.getString('last_access_date');
-    final currentDate = DateTime.now().toString().split(' ')[0]; // Get current date in yyyy-MM-dd format
+    final currentDate = DateTime.now().toString().split(' ')[0];
 
     if (lastAccessDate == null || lastAccessDate != currentDate) {
-      // If last access date is null or different from current date, reset streak to 1
       setState(() {
         _dailyStreak = 1;
       });
-      await prefs.setString('last_access_date', currentDate); // Update last access date
+      await prefs.setString('last_access_date', currentDate);
     } else {
-      // Increment streak if accessed on the same day
       setState(() {
         _dailyStreak++;
       });
@@ -112,11 +98,11 @@ class _HomePageState extends State<HomePage> {
     print('Daily streak: $_dailyStreak');
   }
 
-  Future<void> loadUserDetails() async {
+  // Method to load user details
+  Future<void> _loadUserDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userJson = prefs.getString('user');
     if (userJson != null) {
-      // Decode the JSON string back into a User object
       final Map<String, dynamic> userData = jsonDecode(userJson);
       final User user = User.fromJson(userData);
       setState(() {
@@ -125,28 +111,35 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<Levels>> fetchData() async {
-    final response = await http.get(Uri.parse(
-        'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/guidebook'));
+  // Method to fetch data from the server
+  Future<void> _fetchData() async {
+    final response = await http.get(Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/guidebook'));
     if (response.statusCode == 200) {
       List<dynamic> jsonData = json.decode(response.body);
-      List<Levels> levels =
-          jsonData.map((data) => Levels.fromJson(data)).toList();
-      return levels;
+      List<Levels> levels = jsonData.map((data) => Levels.fromJson(data)).toList();
+      setState(() {
+        guidebookData = levels;
+      });
     } else {
       print('Failed to load guidebook data: ${response.statusCode}');
       throw Exception('Failed to load levels');
     }
   }
 
-  int _currentIndex = 0;
-  String? _currentLevel;
-
-  void setCurrentLevel(String levelName) {
+  // Method to set the current level
+  void _setCurrentLevel(String levelName) {
     setState(() {
       _currentLevel = levelName;
     });
     print('Current Level: $_currentLevel');
+  }
+
+  // Method to log out
+  void _logout(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('user');
+    Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
   }
 
   @override
@@ -160,8 +153,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => const NotificationsPage()),
+                MaterialPageRoute(builder: (context) => const NotificationsPage()),
               );
             },
           ),
@@ -243,34 +235,23 @@ class _HomePageState extends State<HomePage> {
               ),
               const Divider(),
               const SizedBox(height: 20),
-              FutureBuilder<List<Levels>>(
-                future: fetchData(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    List<Levels> levels = snapshot.data!;
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: levels.length,
-                      itemBuilder: (context, index) {
-                        var level = levels[index];
-                        return LevelTile(
-                          name: level.levelName,
-                          subName: level.subtitle,
-                          index: index + 1,
-                          onTap: () => setCurrentLevel(level.levelName),
-                        );
-                      },
+              if (guidebookData.isEmpty)
+                const Center(child: CircularProgressIndicator())
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: guidebookData.length,
+                  itemBuilder: (context, index) {
+                    var level = guidebookData[index];
+                    return LevelTile(
+                      name: level.levelName,
+                      subName: level.subtitle,
+                      index: index + 1,
+                      onTap: () => _setCurrentLevel(level.levelName),
                     );
-                  } else {
-                    return const Center(child: Text('No data available'));
-                  }
-                },
-              )
+                  },
+                ),
             ],
           ),
         ),

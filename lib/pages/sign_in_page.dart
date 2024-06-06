@@ -2,13 +2,26 @@
 
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/snackbar.dart';
 import 'package:french_app/widgets/text_field_input.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+class AuthProvider extends ChangeNotifier {
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
+
+  void setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+}
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -24,9 +37,9 @@ class _LoginScreenState extends State<SignInPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _passwordController.dispose();
     _usernameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,10 +60,8 @@ class _LoginScreenState extends State<SignInPage> {
     showStyledSnackBar(context, message);
   }
 
-  Future<void> _signIn(String username, String password) async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _signIn(String username, String password, AuthProvider auth) async {
+    auth.setLoading(true);
 
     final Uri url = Uri.parse(
         'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/logIn');
@@ -58,7 +69,7 @@ class _LoginScreenState extends State<SignInPage> {
       'username': username,
       'password': password,
     };
-    print(requestBody);
+
     try {
       final http.Response response = await http.post(
         url,
@@ -67,23 +78,15 @@ class _LoginScreenState extends State<SignInPage> {
         },
         body: jsonEncode(requestBody),
       );
-      print(response.statusCode);
-      print(1);
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        print(2);
         final String token = responseData['token'];
-        print(responseData['user']);
         final Map<String, dynamic> userData = responseData['userResponse'];
-        print(4);
-        // Save token and user details to shared preferences
+        
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('user', jsonEncode(userData));
-        String userd = prefs.getString('user')!;
-        String tokend = prefs.getString('token')!;
-        print('User:  $userd');
-        print('Token: $tokend');
 
         Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
@@ -95,24 +98,26 @@ class _LoginScreenState extends State<SignInPage> {
       _showSignInSnackbar(
           context, 'Failed to sign in. Please try again later.');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      auth.setLoading(false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+    return ChangeNotifierProvider(
+      create: (context) => AuthProvider(),
+      child: Scaffold(
+        body: Consumer<AuthProvider>(
+          builder: (context, auth, _) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 RichText(
                   text: TextSpan(
                     style: TextStyle(
@@ -132,43 +137,37 @@ class _LoginScreenState extends State<SignInPage> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
+                const SizedBox(height: 30),
                 TextFieldInput(
                   textEditingController: _usernameController,
                   hintText: "Username",
                   textInputType: TextInputType.text,
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
+                const SizedBox(height: 12),
                 TextFieldInput(
                   textEditingController: _passwordController,
                   hintText: "Password",
                   textInputType: TextInputType.text,
                   isPass: true,
                 ),
-                const SizedBox(
-                  height: 60,
-                ),
+                const SizedBox(height: 60),
                 CustomButton(
-                  text: 'Sign In',
-                  onPressed: () {
-                    final username = _usernameController.text.trim();
-                    final password = _passwordController.text.trim();
-                    if (username.isEmpty || password.isEmpty) {
-                      _showSignInSnackbar(
-                          context, 'Please enter username and password');
-                    } else {
-                      _signIn(username, password);
-                    }
-                  },
-                  isLoading: _isLoading,
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
+                        text: 'Sign In',
+                        onPressed: auth.isLoading
+                            ? null
+                            : () {
+                                final username = _usernameController.text.trim();
+                                final password = _passwordController.text.trim();
+                                if (username.isEmpty || password.isEmpty) {
+                                  _showSignInSnackbar(
+                                      context, 'Please enter username and password');
+                                } else {
+                                  _signIn(username, password, auth);
+                                }
+                              },
+                        isLoading: auth.isLoading,
+                      ),
+                const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -200,7 +199,10 @@ class _LoginScreenState extends State<SignInPage> {
             );
           },
         ),
-      ),
+      );
+      },
+    ),
+    ),
     );
   }
 }

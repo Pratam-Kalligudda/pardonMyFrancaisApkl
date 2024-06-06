@@ -114,16 +114,29 @@ class LessonDetailPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/mcqTest',
-                          arguments: {
-                            'lessonName':
-                                lessonName,
-                            'levelName': levelName,
-                          },
-                        );
+                      onPressed: () async {
+                        final SharedPreferences prefs = await SharedPreferences.getInstance();
+                        final hasTakenTest = prefs.getBool('mcq_test_${lessonName}_$levelName')?? false;
+
+                        if (hasTakenTest) {
+                          Navigator.pushNamed(
+                            context,
+                            '/audioVisualTest',
+                            arguments: {
+                              'lessonName': lessonName,
+                              'levelName': levelName,
+                            },
+                          );
+                        } else {
+                              Navigator.pushNamed(
+                                context,
+                                '/mcqTest',
+                                arguments: {
+                                  'lessonName': lessonName,
+                                  'levelName': levelName,
+                                },
+                              );
+                            }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,

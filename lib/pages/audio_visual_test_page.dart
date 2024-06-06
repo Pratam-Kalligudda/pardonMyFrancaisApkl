@@ -35,7 +35,8 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
       appBar: AppBar(
         title: const Text('Pronunciation Test'),
       ),
-      body: Stack(
+      body: SingleChildScrollView( 
+        child: Stack(
         children: [
           Center(
             child: Column(
@@ -78,6 +79,8 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
                 else
                   Text('French Pronunciation'),
                 SizedBox(height: 100.0),
+                Text('Play Audio', style: TextStyle(fontSize: 16.0),),
+                SizedBox(height: 10.0),
                 IconButton(
                   icon: Icon(Icons.volume_up),
                   onPressed: () {
@@ -89,47 +92,34 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
                   },
                 ),
                 SizedBox(height: 100.0),
-                Center(
-                  child: Text(
+                Text(
                     'As a final part of completing the lesson we will check your pronunciation and tell you how accurate your pronunciation is',
                     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
-                  ),
                 ),
+                SizedBox(height: 30.0),
+                Text(
+                      'Please click the button below to start recording',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                SizedBox(height: 30.0),
+                ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RecordingPage()),
+                        );
+                        testAnswered = true;
+                        // Print to console that the test was answered
+                        print('Test was answered: $testAnswered');
+                      },
+                      child: const Text('Record'),
+                    ),
               ],
             ),
           ),
-          Positioned(
-            bottom: 160.0,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'Please click the button below to start recording',
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 100.0,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RecordingPage()),
-                  );
-                  testAnswered = true;
-                  // Print to console that the test was answered
-                  print('Test was answered: $testAnswered');
-                },
-                child: const Text('Record'),
-              ),
-            ),
-          ),
         ],
+      ),
       ),
     );
   }

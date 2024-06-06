@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'dart:async'; // To use Future.delayed for simulating network request
+import 'package:http/http.dart' as http;
+import 'dart:async';// To use Future.delayed for simulating network request
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+
 
 
 class RecordingPage extends StatefulWidget {
@@ -17,12 +23,6 @@ class _RecordingPageState extends State<RecordingPage> {
   bool _accuracyDisplayed = false;
   double? _accuracyScore;
 
-  void resetAccuracyDisplayed() {
-  setState(() {
-    _accuracyDisplayed = false;
-  });
-}
-
   @override
   void initState() {
     super.initState();
@@ -32,10 +32,11 @@ class _RecordingPageState extends State<RecordingPage> {
   Future<void> initializeCamera() async {
     try {
       final cameras = await availableCameras();
-      final camera = cameras.first;
+      // Filter only the front camera
+      final frontCamera = cameras.firstWhere((camera) => camera.lensDirection == CameraLensDirection.front);
 
       _controller = CameraController(
-        camera,
+        frontCamera,
         ResolutionPreset.high,
       );
 
@@ -68,40 +69,68 @@ class _RecordingPageState extends State<RecordingPage> {
           _isRecording = false;
         });
         print('Video recorded to: ${video.path}');
-        await simulateNetworkRequest();
+        await extractAudioAndSend(video.path);
       } catch (e) {
         print('Error stopping video recording: $e');
       }
     }
   }
 
-  Future<void> simulateNetworkRequest() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
+  Future<void> extractAudioAndSend(String videoPath) async {
+    // Extract audio from the recorded video
+    final flutterFFmpeg = FlutterFFmpeg();
+    final outputAudioPath = videoPath.replaceAll('.mp4', '.mp3');
+    final arguments = ['-i', videoPath, '-vn', '-acodec', 'copy', outputAudioPath];
 
-    // Generate a fake pronunciation accuracy score
-    final fakeScore = (70 + (30 * (1 - 0.7 * 0.7))).roundToDouble();
-    setState(() {
-      _accuracyScore = fakeScore;
-    });
+    try {
+      await flutterFFmpeg.executeWithArguments(arguments);
+    } catch (e) {
+      print('Error extracting audio: $e');
+      return;
+    }
 
-    // Show the result in a dialog or any preferred UI element
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Pronunciation Accuracy'),
-        content: Text('Your pronunciation accuracy score is: $_accuracyScore%'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              resetAccuracyDisplayed();
-            },
-            child: const Text('OK'),
+    // Read the extracted audio file
+    final audioFile = File(outputAudioPath);
+
+    // Send the audio file to the endpoint
+    try {
+      final response = await http.post(
+        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/upload'),
+        body: {'audio': audioFile.readAsBytesSync()},
+      );
+      
+      if (response.statusCode == 200) {
+        // Receive accuracy score from the endpoint
+        setState(() {
+          _accuracyScore = double.parse(response.body);
+          _accuracyDisplayed = true;
+        });
+
+        // Show the result in a dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Pronunciation Accuracy'),
+            content: Text('Your pronunciation accuracy score is: $_accuracyScore%'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    _accuracyDisplayed = false;
+                  });
+                },
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      } else {
+        print('Failed to get accuracy score. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error sending audio to server: $e');
+    }
   }
 
   @override
