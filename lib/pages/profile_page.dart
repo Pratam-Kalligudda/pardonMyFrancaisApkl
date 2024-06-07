@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:french_app/providers/progress_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key});
@@ -407,6 +409,7 @@ Future<String?> _getJwtToken() async {
 
   @override
   Widget build(BuildContext context) {
+    final progressData = Provider.of<ProgressProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -530,20 +533,86 @@ Future<String?> _getJwtToken() async {
                   // const SizedBox(height: 20),
                   const SizedBox(height: 20),
                   Divider(),
-                  _buildStars(),
-                  _buildTotalCoins(), 
-                  const SizedBox(height: 20),
-                  Divider(),
-                  Center(
-                    child: Text(
-                      'Achievements',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                  // _buildStars(),
+                  // _buildTotalCoins(), 
+                  // const SizedBox(height: 20),
+                  // Divider(),
+                  // Center(
+                  //   child: Text(
+                  //     'Achievements',
+                  //     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  //   ),
+                  // ),
+                  // _buildAchievementsGrid(_completedLessons), 
+                   Center(
+                    child: Text('User Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  _buildAchievementsGrid(_completedLessons), // Add this line to display total coins
+                  const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Current Level: ${progressData.currentLevel}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Level Scores: ${progressData.levelScores}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Streak: ${progressData.streak}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Points Earned: ${progressData.pointsEarned}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Achievements: ${progressData.achievements.join(', ')}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Highest Combo: ${progressData.highestCombo}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Last Lesson Date: ${progressData.lastLessonDate}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  // Center(
+                  //   child: Text('Total Levels Completed: ${progressData.totalLevelsCompleted}', style: TextStyle(fontSize: 16)),
+                  // ),
+                  // const SizedBox(height: 20),
+                  ListView(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                children: [
+                  ListTile(
+                    title: Text('Current Level: ${progressData.currentLevel}'),
+                  ),
+                  ListTile(
+                    title: Text('Level Scores: ${progressData.levelScores}'),
+                  ),
+                  ListTile(
+                    title: Text('Streak: ${progressData.streak}'),
+                  ),
+                  ListTile(
+                    title: Text('Points Earned: ${progressData.pointsEarned}'),
+                  ),
+                  ListTile(
+                    title: Text('Achievements: ${progressData.achievements.join(', ')}'),
+                  ),
+                  ListTile(
+                    title: Text('Highest Combo: ${progressData.highestCombo}'),
+                  ),
+                  ListTile(
+                    title: Text('Last Lesson Date: ${progressData.lastLessonDate}'),
+                  ),
+                  ListTile(
+                    title: Text('Total Levels Completed: ${progressData.totalLevelsCompleted}'),
+                  ),
                 ],
               ),
-            ),
+            ],
+          ),
+          ),
           ),
           if (_isLoading)
             Container(
@@ -728,6 +797,4 @@ Widget _buildTotalCoins() {
     ),
   );
 }
-
-
 }

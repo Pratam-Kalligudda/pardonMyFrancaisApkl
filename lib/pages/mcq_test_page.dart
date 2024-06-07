@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
+import 'package:french_app/providers/progress_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MCQTestPage extends StatefulWidget {
@@ -122,8 +124,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
                 }
                 print('Correct Answers: $correctAnswers');
                 print('Score: $score');
-
-                if (isLastQuestion) {
+                print(isLastQuestion);
+                if (currentQuestionIndex == questions!.length - 1) {
+                  print(isLastQuestion);
                   checkAndShowConfirmationDialog();
                 } else {
                   nextQuestion();
@@ -211,7 +214,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     String extractedLevel = extractLevelNumber(levelName);
     int currentLevel = int.parse(extractedLevel);
-
+    print("-----------------------------score  =  $score--------------------------------");
     final requestData = {
         "current_level": currentLevel, 
         "level_scores": {
@@ -229,9 +232,17 @@ class _MCQTestPageState extends State<MCQTestPage> {
         },
         body: jsonEncode(requestData),
       );
-
+      print(response.body);
+      print(response.statusCode);
       if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
         print('Score successfully sent to server');
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString('userProgress', response.body);
+
+        // Update the provider with the response data
+        final progressProvider = Provider.of<ProgressProvider>(context, listen: false);
+        progressProvider.updateProgressData(responseData);
       } else {
         print('Failed to send score to server: ${response.statusCode}');
       }
@@ -240,9 +251,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
     }
   }
 
-
   void checkAndShowConfirmationDialog() {
-    if (selectedOptions.every((element) => element != -1)) {
+    if (selectedOptions != null && selectedOptions.every((element) => element != -1)) {
       // _showNextTestConfirmationDialog();
       allQuestionsAnswered = true;
       if (allCorrect) {
@@ -251,6 +261,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
       } else {
         print('Not all questions were answered correctly.');
       }
+      print(score);
       sendScoreToServer(); 
       Future.delayed(Duration(seconds: 3), () { // Reset to true after showing the dialog
       Navigator.of(context).pop();
@@ -370,7 +381,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
         ElevatedButton(
           onPressed: () {
             if (selectedOptions[currentQuestionIndex] != -1) {
-              checkAndShowConfirmationDialog();
+              // checkAndShowConfirmationDialog();
               submitAnswer();
             }
           },

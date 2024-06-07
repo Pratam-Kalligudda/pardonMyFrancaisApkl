@@ -14,6 +14,7 @@ import 'package:french_app/pages/mcq_test_page.dart';
 import 'package:french_app/pages/profile_page.dart';
 import 'package:french_app/pages/welcome_page.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
+import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/theme/dark_theme.dart';
 import 'package:french_app/theme/light_theme.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [ // Provide the CurrentLevelProvider
         ChangeNotifierProvider(create: (_) => LevelProvider()),
+        ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

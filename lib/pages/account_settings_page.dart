@@ -196,11 +196,12 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
 
     if (response.statusCode == 200) {
     // Clear any authentication tokens or data here if needed
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    print('Username updated successfully');
+    // final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // await prefs.remove('token');
     
-    // Navigate to the sign-in page
-    Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
+    // // Navigate to the sign-in page
+    // Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
     } else {
       print('Failed to update username. Status code: ${response.statusCode}');
       ScaffoldMessenger.of(context).showSnackBar(
