@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:http/http.dart' as http;
@@ -196,13 +197,21 @@ class _MCQTestPageState extends State<MCQTestPage> {
   //   );
   // }
 
+  String extractLevelNumber(String levelString) {
+    final RegExp regex = RegExp(r'\d+'); // This regex matches one or more digits
+    final match = regex.firstMatch(levelString);
+    return match != null ? match.group(0) ?? '' : '';
+  }
+
   Future<void> sendScoreToServer() async {
     final jwtToken = await _getJwtToken();
     if (jwtToken == null) {
       throw Exception('JWT token not found');
     }
-    int currentLevel = int.parse(levelName);
-    
+
+    String extractedLevel = extractLevelNumber(levelName);
+    int currentLevel = int.parse(extractedLevel);
+
     final requestData = {
         "current_level": currentLevel, 
         "level_scores": {
