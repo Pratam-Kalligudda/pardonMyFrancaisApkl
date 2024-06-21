@@ -1,7 +1,29 @@
-import 'package:flutter/material.dart';
+//pages/welcome_page.dart
 
-class WelcomePage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key}) : super(key: key);
+
+  @override
+  State<WelcomePage> createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  void _checkLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token != null) {
+      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoggedIn();
+  }
 
   @override
   Widget build(BuildContext context) {

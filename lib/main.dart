@@ -15,6 +15,7 @@ import 'package:french_app/pages/profile_page.dart';
 import 'package:french_app/pages/welcome_page.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:french_app/providers/progress_provider.dart';
+import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/theme/dark_theme.dart';
 import 'package:french_app/theme/light_theme.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ // Provide the CurrentLevelProvider
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => LevelProvider()),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
@@ -56,7 +58,7 @@ class MyApp extends StatelessWidget {
                 lessonName: '',
                 levelName: '',
               ),
-          '/audiovisual': (context) => AudioVisualTestPage(),
+          '/audiovisual': (context) => AudioVisualTestPage(lessonName: '', levelName: '',),
         },
       ),
     );

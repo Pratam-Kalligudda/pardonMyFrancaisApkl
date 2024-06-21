@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:french_app/providers/progress_provider.dart';
+import 'package:french_app/providers/user_provider.dart';
+import 'package:french_app/widgets/custom_button.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,10 +28,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
   List<Questions>? questions;
   List<int> selectedOptions = [];
   late String levelName;
-  bool allQuestionsAnswered = false;
-  bool isLastQuestion = false;
-  bool isMcqTestAnswered = false;
-  int correctAnswers = 0;
+  // bool allQuestionsAnswered = false;
+  // bool isLastQuestion = false;
+  // bool isMcqTestAnswered = false;
+  // int correctAnswers = 0;
   double score = 0;
   bool allCorrect = true;
 
@@ -39,7 +40,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
     super.initState();
     levelName = widget.levelName;
     _futureSubLevels = _fetchSubLevels();
-    }
+  }
 
   Future<List<SubLevels>> _fetchSubLevels() async {
     try {
@@ -49,8 +50,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
       }
       String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
-        Uri.parse(
-            'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/sublevels/$encodedLevelName'),
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/sublevels/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },
@@ -59,10 +59,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
         List<dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse.map((json) => SubLevels.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load guidebooks');//line 59
+        throw Exception('Failed to load guidebooks');
       }
     } catch (error) {
-      print('Error fetching sublevels: $error');
+      // print('Error fetching sublevels: $error');
       rethrow;
     }
   }
@@ -74,9 +74,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   void selectOption(int index) {
     setState(() {
-      print('Select option called: $index');
+      // print('Select option called: $index');
       selectedOptions[currentQuestionIndex] = index;
-      print(selectedOptions);
+      // print(selectedOptions);
     });
   }
 
@@ -84,10 +84,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
     setState(() {
       if (currentQuestionIndex < questions!.length - 1) {
         currentQuestionIndex++;
-        print("Next question index: $currentQuestionIndex");
+        // print("Next question index: $currentQuestionIndex");
       } else {
-        isLastQuestion = true;
-        print("Last question reached. Test completed.");
+        // isLastQuestion = true;
+        // print("Last question reached. Test completed.");
       }
     });
   }
@@ -98,35 +98,44 @@ class _MCQTestPageState extends State<MCQTestPage> {
     bool isCorrect =
         selectedOption == questions![currentQuestionIndex].correctOption;
 
-        if (!isCorrect) {
-          allCorrect = false;
-        }
+    if (!isCorrect) {
+      allCorrect = false;
+    }
 
-    print("Selected option: $selectedOption");
-    print("Is correct: $isCorrect");
+    // print("Selected option: $selectedOption");
+    // print("Is correct: $isCorrect");
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(isCorrect ? 'Correct!' : 'Incorrect!'),
+          title: Text(isCorrect ? 'Correct!' : 'Incorrect!',
+          style: TextStyle(
+            fontSize: 24,
+            color: isCorrect ? Colors.green : Colors.red
+            ),
+          ),
           content: !isCorrect
-            ? Text(
-                'The correct answer is: ${questions![currentQuestionIndex].correctOption}')
-            : null,
+              ? Text('The correct answer is: ${questions![currentQuestionIndex].correctOption}',
+              style: TextStyle(
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
+              ),
+            )
+              : null,
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 if (isCorrect) {
-                  correctAnswers++;
+                  // correctAnswers++;
                   score += 100 / questions!.length;
                 }
-                print('Correct Answers: $correctAnswers');
-                print('Score: $score');
-                print(isLastQuestion);
+                // print('Correct Answers: $correctAnswers');
+                // print('Score: $score');
+                // print(isLastQuestion);
                 if (currentQuestionIndex == questions!.length - 1) {
-                  print(isLastQuestion);
+                  // print(isLastQuestion);
                   checkAndShowConfirmationDialog();
                 } else {
                   nextQuestion();
@@ -140,68 +149,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
     );
   }
 
-  // Future<void> _showNextTestConfirmationDialog() {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(10.0),
-  //         ),
-  //         backgroundColor: Theme.of(context).colorScheme.onBackground,
-  //         title: const Text(
-  //           'Move to Next Test?',
-  //           style: TextStyle(
-  //             fontSize: 20.0,
-  //             fontWeight: FontWeight.bold,
-  //             color: Colors.black,
-  //           ),
-  //         ),
-  //         content: const Text(
-  //           'Do you want to move to the Pronunciation Test?',
-  //           style: TextStyle(
-  //             fontSize: 18.0,
-  //             color: Colors.black,
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               Navigator.pushNamed(context, '/audiovisual');
-  //             },
-  //             child: const Text(
-  //               'Yes',
-  //               style: TextStyle(
-  //                 fontSize: 18.0,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.blue,
-  //               ),
-  //             ),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               Navigator.pushNamed(context, '/lessonDetail');
-  //             },
-  //             child: const Text(
-  //               'No',
-  //               style: TextStyle(
-  //                 fontSize: 18.0,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.red,
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   String extractLevelNumber(String levelString) {
-    final RegExp regex = RegExp(r'\d+'); // This regex matches one or more digits
+    final RegExp regex = RegExp(r'\d+');
     final match = regex.firstMatch(levelString);
     return match != null ? match.group(0) ?? '' : '';
   }
@@ -214,58 +163,58 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     String extractedLevel = extractLevelNumber(levelName);
     int currentLevel = int.parse(extractedLevel);
-    print("-----------------------------score  =  $score--------------------------------");
     final requestData = {
-        "current_level": currentLevel, 
-        "level_scores": {
-          "$currentLevel": score,
-        },
-        "allQuestionsRight": allCorrect,
+      "current_level": currentLevel,
+      "level_scores": {
+        "$currentLevel": score,
+      },
+      "allQuestionsRight": allCorrect,
     };
 
     try {
       final response = await http.post(
-        Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/updateUserProgress'),
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateUserProgress'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $jwtToken',
         },
         body: jsonEncode(requestData),
       );
-      print(response.body);
-      print(response.statusCode);
+      // print(response.body);
+      // print(response.statusCode);
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        print('Score successfully sent to server');
+        // print('Score successfully sent to server');
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('userProgress', response.body);
 
-        // Update the provider with the response data
-        final progressProvider = Provider.of<ProgressProvider>(context, listen: false);
-        progressProvider.updateProgressData(responseData);
       } else {
-        print('Failed to send score to server: ${response.statusCode}');
+        // print('Failed to send score to server: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error sending score to server: $error');
+      // print('Error sending score to server: $error');
     }
   }
 
+  void _submitTest(String levelName, double score) {
+    Provider.of<UserProvider>(context, listen: false).updateLevelScore(levelName, score);
+  }
+
   void checkAndShowConfirmationDialog() {
-    if (selectedOptions != null && selectedOptions.every((element) => element != -1)) {
-      // _showNextTestConfirmationDialog();
-      allQuestionsAnswered = true;
+    if (selectedOptions.every((element) => element != -1)) {
+      // allQuestionsAnswered = true;
       if (allCorrect) {
         allCorrect = true;
-        print('All questions were answered correctly.');
+        // print('All questions were answered correctly.');
       } else {
-        print('Not all questions were answered correctly.');
+        // print('Not all questions were answered correctly.');
       }
-      print(score);
-      sendScoreToServer(); 
-      Future.delayed(Duration(seconds: 3), () { // Reset to true after showing the dialog
-      Navigator.of(context).pop();
-      Navigator.pushNamed(context, '/audiovisual');
+      // print(score);
+      sendScoreToServer();
+      _submitTest(levelName, score);
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.of(context).pop();
+        Navigator.pushNamed(context, '/audiovisual');
       });
     }
   }
@@ -279,7 +228,14 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.levelName} MCQ Test'),
+        title: Text(levelName,
+         style: const TextStyle(
+            fontSize: 20,
+          ),
+        ),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -294,11 +250,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
               } else if (snapshot.hasData) {
                 final subLevels = snapshot.data as List<SubLevels>;
                 questions = subLevels[0].questions;
-                print('Questions length: ${questions?.length}');
+                // print('Questions length: ${questions?.length}');
                 if (selectedOptions.isEmpty) {
                   selectedOptions = List<int>.filled(questions!.length, -1);
                 }
-                print(selectedOptions);
+                // print(selectedOptions);
                 return buildMCQTestView(context);
               }
             }
@@ -310,87 +266,90 @@ class _MCQTestPageState extends State<MCQTestPage> {
   }
 
   Widget buildMCQTestView(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Multiple Choice Questions',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Text(
+              'Multiple Choice Questions',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'Select the correct option for the question from the given options',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Select the correct option for the question from the given options',
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-        const SizedBox(height: 30),
-        Text(
-          questions![currentQuestionIndex].question,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
+          const SizedBox(height: 50),
+          Text(
+            questions![currentQuestionIndex].question,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
-        Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: questions![currentQuestionIndex].options.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  selectOption(index);
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    ),
-                    color: selectedOptions[currentQuestionIndex] == index
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                        : Colors.transparent,
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  child: Text(
-                    questions![currentQuestionIndex].options[index],
-                    style: TextStyle(
+          const SizedBox(height: 20),
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: questions![currentQuestionIndex].options.length,
+              itemBuilder: (context, index) {
+                return InkWell(
+                  onTap: () {
+                    selectOption(index);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
                       color: selectedOptions[currentQuestionIndex] == index
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.onSurface,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                          ? Theme.of(context).colorScheme.secondary
+                          : Colors.transparent,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    child: Text(
+                      questions![currentQuestionIndex].options[index],
+                      style: TextStyle(
+                        color: selectedOptions[currentQuestionIndex] == index
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            if (selectedOptions[currentQuestionIndex] != -1) {
-              // checkAndShowConfirmationDialog();
-              submitAnswer();
-            }
-          },
-          child: const Text(
-            'Submit Answer',
-            style: TextStyle(fontSize: 18),
+          const SizedBox(height: 20),
+          CustomButton(
+            text: 'Submit Answer',
+            onPressed: () {
+              if (selectedOptions[currentQuestionIndex] != -1) {
+                submitAnswer();
+              }
+            }, isLoading: false,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

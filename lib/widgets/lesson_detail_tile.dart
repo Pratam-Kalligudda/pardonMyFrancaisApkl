@@ -53,24 +53,6 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
   }
 
   Future<void> _fetchAndPlayPronunciation() async {
-    // print("object");
-    // try {
-    //   // Fetch the pronunciation audio
-    //   final response = await http.get(
-    //     Uri.parse(
-    //         'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/audio/$phrase'),
-    //   );
-    //   if (response.statusCode == 200) {
-    //     // Play the audio
-    //     Uint8List audio = response.bodyBytes;
-    //     AudioPlayer audioPlayer = AudioPlayer();
-    //     await audioPlayer.play(BytesSource(audio));
-    //   } else {
-    //     throw Exception('Failed to load pronunciation audio');
-    //   }
-    // } catch (e) {
-    //   print('Error playing audio: $e');
-    // }
     await flutterTts.setLanguage('fr-FR');
     await flutterTts.setVolume(1.0);
         await flutterTts.setSpeechRate(0.5);
@@ -128,20 +110,6 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
           ),
         ),
       ),
-      // if (text.contains('Pronunciation:')) // Add pronunciation icon
-      //   Icon(
-      //     Icons.volume_up,
-      //     color: widget.pronunciationCompleted
-      //         ? Theme.of(context).colorScheme.primary
-      //         : Theme.of(context).disabledColor,
-      //   ),
-      // if (text.contains('Translation:')) // Add MCQ icon
-      //   Icon(
-      //     Icons.quiz,
-      //     color: widget.mcqCompleted
-      //         ? Theme.of(context).colorScheme.primary
-      //         : Theme.of(context).disabledColor,
-      //   ),
     ],
   );
 }

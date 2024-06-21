@@ -5,9 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 ThemeData lightTheme = ThemeData(
   appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
       iconTheme: IconThemeData(
-        color: Color.fromRGBO(21, 21, 21, 1),
+        color: Colors.black
       )),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       selectedItemColor: Color.fromRGBO(24, 176, 137, 1), // Set your desired color

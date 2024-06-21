@@ -22,7 +22,7 @@ class AccountSettingsPage extends StatelessWidget {
     }
 
     final response = await http.get(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/user'),
+      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/user'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $jwtToken',
@@ -99,7 +99,7 @@ class AccountSettingsPage extends StatelessWidget {
     }
 
     final response = await http.delete(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/deleteUser'),
+      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/deleteUser'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $jwtToken',
@@ -182,7 +182,7 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
     }
 
     final response = await http.post(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/updateProfile'),
+      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $jwtToken',
@@ -222,65 +222,71 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
   }
 }
 
-Future<void> _updatePassword(String oldPassword, String newPassword, BuildContext context) async {
-  try {
-    final jwtToken = await _getJwtToken();
-    if (jwtToken == null) {
-      throw Exception('JWT token not found');
-    }
+  Future<void> _updatePassword(String oldPassword, String newPassword, BuildContext context) async {
+    try {
+      final jwtToken = await _getJwtToken();
+      if (jwtToken == null) {
+        throw Exception('JWT token not found');
+      }
 
-    final response = await http.post(
-      Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/updateProfile'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $jwtToken',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'updates': [
-          {'field': 'password', 'value': newPassword, 'old_value': oldPassword},
-        ],
-      }),
-    );
+      final response = await http.post(
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'updates': [
+            {'field': 'password', 'value': newPassword, 'old_value': oldPassword},
+          ],
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
-      print('Password updated successfully');
+      if (response.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('token');
+        print('Password updated successfully');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Password updated successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
+      } else if (response.statusCode == 401) {
+        print('Failed to update password. Unauthorized (401).');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Unauthorized request. Please log in again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Navigate to sign-in page to re-authenticate
+        // Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
+      } else {
+        print('Failed to update password. Status code: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update password. Status code: ${response.statusCode}'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (error) {
+      print('Error updating password: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Password updated successfully'),
-                  duration: Duration(seconds: 2), // Adjust duration as needed
-        ),
-      );
-      Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => route.isFirst);
-    } else {
-      print('Failed to update password. Status code: ${response.statusCode}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update password. Status code: ${response.statusCode}'),
-                  duration: Duration(seconds: 2), // Adjust duration as needed
+          content: Text('Error updating password: $error'),
+          duration: Duration(seconds: 2),
         ),
       );
     }
-  } catch (error) {
-    print('Error updating password: $error');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error updating password: $error'),
-        duration: Duration(seconds: 2), // Adjust duration as needed
-      ),
-    );
   }
-}
 
   void _showChangePasswordDialog(BuildContext context) {
     TextEditingController currentPasswordController = TextEditingController();
     TextEditingController newPasswordController = TextEditingController();
     TextEditingController confirmNewPasswordController = TextEditingController();
-
-    String oldPassword = currentPasswordController.text;
-    String newPassword = newPasswordController.text;
-    String confirmNewPassword = confirmNewPasswordController.text;
 
     showDialog(
       context: context,
@@ -324,7 +330,6 @@ Future<void> _updatePassword(String oldPassword, String newPassword, BuildContex
             ),
             TextButton(
               onPressed: () async {
-                // Implement logic to update password
                 String currentPassword = currentPasswordController.text;
                 String newPassword = newPasswordController.text;
                 String confirmNewPassword = confirmNewPasswordController.text;
@@ -332,7 +337,7 @@ Future<void> _updatePassword(String oldPassword, String newPassword, BuildContex
                 print('New Password: $newPassword');
                 print('Confirm New Password: $confirmNewPassword');
                 if (newPassword.isNotEmpty && newPassword == confirmNewPassword) {
-                  await _updatePassword(oldPassword, newPassword, context);
+                  await _updatePassword(currentPassword, newPassword, context);
                 }
                 Navigator.pop(context);
               },

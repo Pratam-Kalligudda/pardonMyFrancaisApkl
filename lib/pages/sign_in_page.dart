@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/snackbar.dart';
 import 'package:french_app/widgets/text_field_input.dart';
@@ -33,7 +32,7 @@ class SignInPage extends StatefulWidget {
 class _LoginScreenState extends State<SignInPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -64,7 +63,7 @@ class _LoginScreenState extends State<SignInPage> {
     auth.setLoading(true);
 
     final Uri url = Uri.parse(
-        'http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/logIn');
+        'http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/logIn');
     final Map<String, String> requestBody = {
       'username': username,
       'password': password,
@@ -94,7 +93,7 @@ class _LoginScreenState extends State<SignInPage> {
         _showSignInSnackbar(context, errorMessage);
       }
     } catch (e) {
-      print('Error: $e');
+      // print('Error: $e');
       _showSignInSnackbar(
           context, 'Failed to sign in. Please try again later.');
     } finally {

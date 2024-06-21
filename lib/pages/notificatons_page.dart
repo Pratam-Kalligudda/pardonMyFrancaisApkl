@@ -15,16 +15,16 @@ class NotificationsPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
       ),
-      body: _buildNotificationsContent(),
+      body: _buildNotificationsContent(context),
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 1, // Current index for the profile page
+        currentIndex: 0,
         onTap: (index) {
           switch (index) {
             case 0:
               Navigator.pushNamed(context, '/home');
               break;
             case 1:
-              // Do nothing as it's the current page
+              Navigator.pushNamed(context, '/profile');
               break;
             case 2:
               Navigator.pushNamed(context, '/settings');
@@ -35,13 +35,15 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationsContent() {
+  Widget _buildNotificationsContent(BuildContext context) {
     // Your logic to fetch notifications can go here
     List<String> notifications = [];
 
     if (notifications.isEmpty) {
-      return const Center(
-        child: Text('No new notifications'),
+      return Center(
+        child: Text('No new notifications',
+        style: TextStyle(fontSize: 18.0, color: Theme.of(context).colorScheme.onSurface),
+        ),
       );
     } else {
       return ListView.builder(

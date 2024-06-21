@@ -8,14 +8,14 @@ class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
   final int index;
-  final VoidCallback onTap;
+  final double score;
 
   const LevelTile({
     Key? key,
     required this.name,
     required this.subName,
     required this.index,
-    required this.onTap,
+    required this.score,
   }) : super(key: key);
 
   @override
@@ -34,7 +34,6 @@ class LevelTile extends StatelessWidget {
               'levelName': name,
             },
           );
-          onTap();
         },
         child: Container(
           padding: const EdgeInsets.all(18),
@@ -81,6 +80,16 @@ class LevelTile extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Text(
+                  "$score",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
