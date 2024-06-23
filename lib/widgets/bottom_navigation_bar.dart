@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 
+/// Custom bottom navigation bar widget.
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -16,20 +17,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: currentIndex,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            Navigator.pushNamed(context, '/home');
-            break;
-          case 1:
-            Navigator.pushNamed(context, '/profile');
-            break;
-          case 2:
-            Navigator.pushNamed(context, '/settings');
-            break;
-          default:
-        }
-      },
+      onTap: onTap,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),

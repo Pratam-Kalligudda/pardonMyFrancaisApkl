@@ -3,21 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-
+/// Widget to display details of a lesson with pronunciation support.
 class LessonDetailTile extends StatefulWidget {
   final String phrase;
   final String pronunciation;
   final String translation;
-  final bool mcqCompleted;
-  final bool pronunciationCompleted;
 
   const LessonDetailTile({
     Key? key,
     required this.phrase,
     required this.pronunciation,
     required this.translation,
-    this.mcqCompleted = false,
-    this.pronunciationCompleted = false,
   }) : super(key: key);
 
   @override
@@ -32,6 +28,17 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
   void initState() {
     super.initState();
     flutterTts = FlutterTts();
+    _initTts();
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  /// Initialize FlutterTts and set up handlers.
+  Future<void> _initTts() async {
     flutterTts.setStartHandler(() {
       setState(() {
         isPlaying = true;
@@ -48,18 +55,18 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
       setState(() {
         isPlaying = false;
       });
-      print('Error playing audio: $err');
     });
-  }
 
-  Future<void> _fetchAndPlayPronunciation() async {
     await flutterTts.setLanguage('fr-FR');
     await flutterTts.setVolume(1.0);
-        await flutterTts.setSpeechRate(0.5);
-        await flutterTts.setPitch(1.0);
-        await flutterTts.awaitSpeakCompletion(true);
-        await flutterTts.speak(widget.phrase);
-        
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+
+  /// Fetch and play the pronunciation of the lesson phrase.
+  Future<void> _fetchAndPlayPronunciation() async {
+    await flutterTts.speak(widget.phrase);
   }
 
   @override
@@ -80,11 +87,9 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
             children: [
               _buildText(widget.phrase, FontWeight.bold, 20, context),
               const SizedBox(height: 8),
-              _buildText('Pronunciation: ${widget.pronunciation}', FontWeight.normal, 16,
-                  context),
+              _buildText('Pronunciation: ${widget.pronunciation}', FontWeight.normal, 16, context),
               const SizedBox(height: 4),
-              _buildText(
-                  'Translation: ${widget.translation}', FontWeight.normal, 16, context),
+              _buildText('Translation: ${widget.translation}', FontWeight.normal, 16, context),
             ],
           ),
         ),
@@ -92,26 +97,15 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     );
   }
 
-  Widget _buildText(
-  String text,
-  FontWeight fontWeight,
-  double fontSize,
-  BuildContext context,
-) {
-  return Row(
-    children: [
-      Expanded(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
+  /// Helper method to build text with specified style.
+  Widget _buildText(String text, FontWeight fontWeight, double fontSize, BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
-    ],
-  );
-}
-
+    );
+  }
 }

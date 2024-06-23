@@ -3,7 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:provider/provider.dart';
+import 'circle_avatar_with_border.dart';
+import 'score_text_widget.dart';
 
+/// Widget to display a tile representing a level with details.
 class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
@@ -44,54 +47,19 @@ class LevelTile extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              CircleAvatarWithBorder(index: index),
+              const SizedBox(width: 18),
+              VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            width: 3),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "$index",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(padding: EdgeInsets.only(left: 18)),
-                    VerticalDivider(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    Text(
-                      subName,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
                 child: Text(
-                  "$score",
+                  subName,
                   style: TextStyle(
                     fontSize: 18,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ),
+              ScoreTextWidget(score: score),
             ],
           ),
         ),

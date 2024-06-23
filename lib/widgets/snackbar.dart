@@ -2,20 +2,23 @@
 
 import 'package:flutter/material.dart';
 
-void showStyledSnackBar(BuildContext context, String text) {
+/// Shows a styled SnackBar with customizable text and optional text style.
+void showStyledSnackBar(BuildContext context, String text, {TextStyle? textStyle}) {
+  final defaultTextStyle = TextStyle(
+    fontSize: 16,
+    color: Theme.of(context).colorScheme.background,
+  );
+
   final snackBar = SnackBar(
     content: Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 16,
-          color: Theme.of(context).colorScheme.background,
-        ),
+        style: textStyle ?? defaultTextStyle,
       ),
     ),
     backgroundColor: Theme.of(context).colorScheme.primary,
-    duration: const Duration(seconds: 5),
+    duration: const Duration(seconds: 3),
     behavior: SnackBarBehavior.floating,
   );
 

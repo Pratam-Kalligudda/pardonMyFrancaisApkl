@@ -1,5 +1,8 @@
+// widgets/custom_button.dart
+
 import 'package:flutter/material.dart';
 
+/// Custom button widget that shows loading indicator when isLoading is true.
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -14,34 +17,38 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         elevation: 12,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: colorScheme.primary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        height: 30,
-        child: Center(
-          child: isLoading
-              ? CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                )
-              : Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 30,
+          vertical: isLoading ? 10 : 14,
         ),
       ),
+      child: isLoading
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+              ),
+            )
+          : Text(
+              text,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onPrimary,
+              ),
+            ),
     );
   }
 }
