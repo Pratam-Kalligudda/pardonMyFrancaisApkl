@@ -1,70 +1,39 @@
 // models/level.dart
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'guidebook_content.dart';
 
+/// Parses JSON strings into Levels objects and vice versa.
 List<Levels> levelsFromJson(String str) => List<Levels>.from(json.decode(str).map((x) => Levels.fromJson(x)));
 
+/// Converts a list of Levels objects into a JSON string.
 String levelsToJson(List<Levels> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
+/// Represents a learning level with its details and content.
 class Levels with ChangeNotifier {
-    String levelName;
-    String subtitle;
-    List<GuidebookContent> guidebookContent;
-    bool isMCQCompleted;
-    bool isPronunciationTestCompleted;
+  final String levelName;
+  final String subtitle;
+  final List<GuidebookContent> guidebookContent;
 
-    Levels({
-        required this.levelName,
-        required this.subtitle,
-        required this.guidebookContent,
-        this.isMCQCompleted = false,
-        this.isPronunciationTestCompleted = false,
-    });
+  Levels({
+    required this.levelName,
+    required this.subtitle,
+    required this.guidebookContent,
+  });
 
-    factory Levels.fromJson(Map<String, dynamic> json) => Levels(
+  /// Converts a JSON map into a Levels object.
+  factory Levels.fromJson(Map<String, dynamic> json) => Levels(
         levelName: json["level_name"],
         subtitle: json["subtitle"],
-        guidebookContent: List<GuidebookContent>.from(json["guidebook_content"].map((x) => GuidebookContent.fromJson(x))),
-    );
+        guidebookContent: List<GuidebookContent>.from(
+            json["guidebook_content"].map((x) => GuidebookContent.fromJson(x))),
+      );
 
-    Map<String, dynamic> toJson() => {
+  /// Converts a Levels object into a JSON map.
+  Map<String, dynamic> toJson() => {
         "level_name": levelName,
-        "subtitle" : subtitle,
+        "subtitle": subtitle,
         "guidebook_content": List<dynamic>.from(guidebookContent.map((x) => x.toJson())),
-    };
+      };
 }
-
-class GuidebookContent {
-    String frenchWord;
-    String frenchPronunciation;
-    String englishTranslation;
-    bool isPronunciationTestCompleted;
-    bool isMCQTestCompleted;
-
-    GuidebookContent({
-        required this.frenchWord,
-        required this.frenchPronunciation,
-        required this.englishTranslation,
-        this.isPronunciationTestCompleted = false,
-        this.isMCQTestCompleted = false,
-    });
-
-    factory GuidebookContent.fromJson(Map<String, dynamic> json) => GuidebookContent(
-        frenchWord: json["french_word"],
-        frenchPronunciation: json["french_pronunciation"],
-        englishTranslation: json["english_translation"],
-        isMCQTestCompleted: json["is_mcq_test_completed"] ?? false,
-        isPronunciationTestCompleted: json["is_pronunciation_test_completed"] ?? false,
-    );
-
-    Map<String, dynamic> toJson() => {
-        "french_word": frenchWord,
-        "french_pronunciation": frenchPronunciation,
-        "english_translation": englishTranslation,
-        "is_mcq_test_completed": isMCQTestCompleted,
-        "is_pronunciation_test_completed": isPronunciationTestCompleted,
-    };
-}
-
