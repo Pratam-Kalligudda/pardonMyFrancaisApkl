@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
-            initialRoute: '/settings',
+            initialRoute: '/',
             routes: {
               '/': (context) => const WelcomePage(),
               '/signIn': (context) => const SignInPage(),

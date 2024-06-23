@@ -49,7 +49,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
       }
       String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/sublevels/$encodedLevelName'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/sublevels/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },
@@ -160,7 +160,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateUserProgress'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/updateUserProgress'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $jwtToken',

@@ -52,7 +52,7 @@ class _LoginScreenState extends State<SignInPage> {
     auth.setLoading(true);
 
     final Uri url = Uri.parse(
-        'http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/logIn');
+        'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/logIn');
     final Map<String, String> requestBody = {
       'username': username,
       'password': password,
@@ -133,7 +133,6 @@ class _LoginScreenState extends State<SignInPage> {
                       textEditingController: _passwordController,
                       hintText: "Password",
                       textInputType: TextInputType.text,
-                      isPass: true,
                     ),
                     const SizedBox(height: 60),
                     CustomButton(

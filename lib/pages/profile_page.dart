@@ -54,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserProgress() async {
-    final response = await http.get(Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/getUserProgress'));
+    final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/getUserProgress'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       final response = await http.get(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/user'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -105,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       final response = await http.post(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/updateProfile'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',

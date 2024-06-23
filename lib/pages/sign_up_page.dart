@@ -77,7 +77,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     textEditingController: _passwordController,
                     hintText: "Password",
                     textInputType: TextInputType.text,
-                    isPass: true,
                   ),
                   const SizedBox(height: 60),
                   CustomButton(

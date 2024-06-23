@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchData() async {
     try {
-      final response = await http.get(Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/guidebook'));
+      final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/guidebook'));
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
         List<Levels> levels = jsonData.map((data) => Levels.fromJson(data)).toList();
