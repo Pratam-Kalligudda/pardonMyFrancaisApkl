@@ -15,32 +15,30 @@ class AccountSettingsPage extends StatelessWidget {
   }
 
   Future<String?> _fetchCurrentUsername() async {
-  try {
-    final jwtToken = await _getJwtToken();
-    if (jwtToken == null) {
-      throw Exception('JWT token not found');
-    }
+    try {
+      final jwtToken = await _getJwtToken();
+      if (jwtToken == null) {
+        throw Exception('JWT token not found');
+      }
 
-    final response = await http.get(
-      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/user'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $jwtToken',
-      },
-    );
+      final response = await http.get(
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/user'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> userData = json.decode(response.body);
-      return userData['username'];
-    } else {
-      print('Failed to fetch current username. Status code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> userData = json.decode(response.body);
+        return userData['username'];
+      } else {
+        return null;
+      }
+    } catch (error) {
       return null;
     }
-  } catch (error) {
-    print('Error fetching current username: $error');
-    return null;
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -80,149 +78,62 @@ class AccountSettingsPage extends StatelessWidget {
         ListTile(
           title: const Text('Delete Account'),
           subtitle: const Text('Delete your account'),
-          leading: const Icon(Icons.lock),
+          leading: const Icon(Icons.delete),
           onTap: () {
             _showDeleteAccountDialog(context);
           },
         ),
         const Divider(),
-        // Add more settings options as needed
       ],
     );
   }
 
-  void _deleteUser(BuildContext context) async {
-  try {
-    final jwtToken = await _getJwtToken();
-    if (jwtToken == null) {
-      throw Exception('JWT token not found');
-    }
+  void _showChangeUsernameDialog(BuildContext context) async {
+    TextEditingController newUsernameController = TextEditingController();
+    String? currentUsername = await _fetchCurrentUsername();
 
-    final response = await http.delete(
-      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/deleteUser'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $jwtToken',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      // Remove tokens from local storage
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
-
-      // Account deleted successfully
-      // Navigate back to welcome page or any other appropriate action
-      Navigator.pop(context); // Close the dialog
-      Navigator.pushReplacementNamed(context, '/'); // Navigate to welcome page
-    } else {
-      print('Failed to delete account. Status code: ${response.statusCode}');
-      // Optionally, show an error message to the user
-    }
-  } catch (error) {
-    print('Error deleting account: $error');
-    // Handle network errors or other exceptions
-  }
-}
-
-void _showSignInSnackbar(BuildContext context, String message) {
-    showStyledSnackBar(context, message);
-  }
-
-void _showChangeUsernameDialog(BuildContext context) async {
-  TextEditingController newUsernameController = TextEditingController();
-  String? currentUsername = await _fetchCurrentUsername();
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Change Username'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Current username: $currentUsername'),
-            TextField(
-              controller: newUsernameController,
-              decoration: const InputDecoration(
-                hintText: 'Enter new username',
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Username'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Current username: $currentUsername'),
+              TextField(
+                controller: newUsernameController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter new username',
+                ),
               ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
             ),
-            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () async {
+                String newUsername = newUsernameController.text;
+                if (newUsername.isNotEmpty) {
+                  await _updateUsername(newUsername, context);
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              String newUsername = newUsernameController.text;
-              if (newUsername.isNotEmpty) {
-                await _updateUsername(newUsername, context);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
-Future<void> _updateUsername(String newUsername, BuildContext context) async {
-  try {
-    final jwtToken = await _getJwtToken();
-    if (jwtToken == null) {
-      throw Exception('JWT token not found');
-    }
-
-    final response = await http.post(
-      Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $jwtToken',
+        );
       },
-      body: jsonEncode(<String, dynamic>{
-        'updates': [
-          {'field': 'username', 'value': newUsername},
-        ],
-      }),
     );
-
-    if (response.statusCode == 200) {
-    // Clear any authentication tokens or data here if needed
-    print('Username updated successfully');
-    // final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('token');
-    
-    // // Navigate to the sign-in page
-    // Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
-    } else {
-      print('Failed to update username. Status code: ${response.statusCode}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update username. Status code: ${response.statusCode}'),
-        ),
-      );
-      // Optionally, show an error message to the user
-    }
-  } catch (error) {
-    print('Error updating username: $error');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error updating username: $error'),
-      ),
-    );
-    // Handle network errors or other exceptions
   }
-}
 
-  Future<void> _updatePassword(String oldPassword, String newPassword, BuildContext context) async {
+  Future<void> _updateUsername(String newUsername, BuildContext context) async {
     try {
       final jwtToken = await _getJwtToken();
       if (jwtToken == null) {
@@ -237,49 +148,18 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
         },
         body: jsonEncode(<String, dynamic>{
           'updates': [
-            {'field': 'password', 'value': newPassword, 'old_value': oldPassword},
+            {'field': 'username', 'value': newUsername},
           ],
         }),
       );
 
       if (response.statusCode == 200) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.remove('token');
-        print('Password updated successfully');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Password updated successfully'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
-      } else if (response.statusCode == 401) {
-        print('Failed to update password. Unauthorized (401).');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Unauthorized request. Please log in again.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        // Navigate to sign-in page to re-authenticate
-        // Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
+        showStyledSnackBar(context, 'Username updated successfully');
       } else {
-        print('Failed to update password. Status code: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update password. Status code: ${response.statusCode}'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        showStyledSnackBar(context, 'Failed to update username. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error updating password: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating password: $error'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      showStyledSnackBar(context, 'Error updating username: $error');
     }
   }
 
@@ -333,11 +213,10 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
                 String currentPassword = currentPasswordController.text;
                 String newPassword = newPasswordController.text;
                 String confirmNewPassword = confirmNewPasswordController.text;
-                print('Current Password: $currentPassword');
-                print('New Password: $newPassword');
-                print('Confirm New Password: $confirmNewPassword');
                 if (newPassword.isNotEmpty && newPassword == confirmNewPassword) {
                   await _updatePassword(currentPassword, newPassword, context);
+                } else {
+                  showStyledSnackBar(context, 'New passwords do not match');
                 }
                 Navigator.pop(context);
               },
@@ -349,29 +228,92 @@ Future<void> _updateUsername(String newUsername, BuildContext context) async {
     );
   }
 
-  void _showDeleteAccountDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text('Are you sure you want to delete your account?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () {
-              _deleteUser(context);
-            },
-            child: const Text('Yes'),
-          ),
-        ],
+  Future<void> _updatePassword(String oldPassword, String newPassword, BuildContext context) async {
+    try {
+      final jwtToken = await _getJwtToken();
+      if (jwtToken == null) {
+        throw Exception('JWT token not found');
+      }
+
+      final response = await http.post(
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'updates': [
+            {'field': 'password', 'value': newPassword, 'old_value': oldPassword},
+          ],
+        }),
       );
-    },
-  );
-}
+
+      if (response.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('token');
+        showStyledSnackBar(context, 'Password updated successfully');
+        Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
+      } else if (response.statusCode == 401) {
+        showStyledSnackBar(context, 'Unauthorized request. Please log in again.');
+      } else {
+        showStyledSnackBar(context, 'Failed to update password. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      showStyledSnackBar(context, 'Error updating password: $error');
+    }
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Account'),
+          content: const Text('Are you sure you want to delete your account?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteUser(context);
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteUser(BuildContext context) async {
+    try {
+      final jwtToken = await _getJwtToken();
+      if (jwtToken == null) {
+        throw Exception('JWT token not found');
+      }
+
+      final response = await http.delete(
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/deleteUser'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('token');
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/');
+      } else {
+        showStyledSnackBar(context, 'Failed to delete account. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      showStyledSnackBar(context, 'Error deleting account: $error');
+    }
+  }
 }

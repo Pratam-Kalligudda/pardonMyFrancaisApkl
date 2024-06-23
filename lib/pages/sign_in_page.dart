@@ -10,17 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/snackbar.dart';
 import 'package:french_app/widgets/text_field_input.dart';
-
-class AuthProvider extends ChangeNotifier {
-  bool _isLoading = false;
-
-  bool get isLoading => _isLoading;
-
-  void setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-}
+import 'package:french_app/providers/auth_provider.dart'; 
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -32,7 +22,6 @@ class SignInPage extends StatefulWidget {
 class _LoginScreenState extends State<SignInPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -93,7 +82,6 @@ class _LoginScreenState extends State<SignInPage> {
         _showSignInSnackbar(context, errorMessage);
       }
     } catch (e) {
-      // print('Error: $e');
       _showSignInSnackbar(
           context, 'Failed to sign in. Please try again later.');
     } finally {
@@ -103,105 +91,105 @@ class _LoginScreenState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
-      child: Scaffold(
-        body: Consumer<AuthProvider>(
-          builder: (context, auth, _) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              width: double.infinity,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    children: [
-                      const TextSpan(text: "Sign in to continue your "),
-                      TextSpan(
-                        text: "French",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const TextSpan(text: " lessons"),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-                TextFieldInput(
-                  textEditingController: _usernameController,
-                  hintText: "Username",
-                  textInputType: TextInputType.text,
-                ),
-                const SizedBox(height: 12),
-                TextFieldInput(
-                  textEditingController: _passwordController,
-                  hintText: "Password",
-                  textInputType: TextInputType.text,
-                  isPass: true,
-                ),
-                const SizedBox(height: 60),
-                CustomButton(
-                        text: 'Sign In',
-                        onPressed: auth.isLoading
-                            ? null
-                            : () {
-                                final username = _usernameController.text.trim();
-                                final password = _passwordController.text.trim();
-                                if (username.isEmpty || password.isEmpty) {
-                                  _showSignInSnackbar(
-                                      context, 'Please enter username and password');
-                                } else {
-                                  _signIn(username, password, auth);
-                                }
-                              },
-                        isLoading: auth.isLoading,
-                      ),
-                const SizedBox(height: 30),
-                Row(
+    return Scaffold(
+      body: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Don't have an account?",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.onBackground,
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        children: [
+                          const TextSpan(text: "Sign in to continue your "),
+                          TextSpan(
+                            text: "French",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const TextSpan(text: " lessons"),
+                        ],
                       ),
                     ),
-                    TextButton(
-                      onPressed: _isLoading
+                    const SizedBox(height: 30),
+                    TextFieldInput(
+                      textEditingController: _usernameController,
+                      hintText: "Username",
+                      textInputType: TextInputType.text,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFieldInput(
+                      textEditingController: _passwordController,
+                      hintText: "Password",
+                      textInputType: TextInputType.text,
+                      isPass: true,
+                    ),
+                    const SizedBox(height: 60),
+                    CustomButton(
+                      text: 'Sign In',
+                      onPressed: auth.isLoading
                           ? null
                           : () {
-                              Navigator.pushNamed(context, '/signUp');
+                              final username = _usernameController.text.trim();
+                              final password = _passwordController.text.trim();
+                              if (username.isEmpty) {
+                                _showSignInSnackbar(
+                                    context, 'Please enter username');
+                              } else if (password.isEmpty) {
+                                _showSignInSnackbar(
+                                    context, 'Please enter password');
+                              } else {
+                                _signIn(username, password, auth);
+                              }
                             },
-                      child: Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.primary,
+                      isLoading: auth.isLoading,
+                    ),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onBackground,
+                          ),
                         ),
-                      ),
+                        TextButton(
+                          onPressed: auth.isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(context, '/signUp');
+                                },
+                          child: Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ],
-            );
-          },
-        ),
-      );
-      },
-    ),
-    ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

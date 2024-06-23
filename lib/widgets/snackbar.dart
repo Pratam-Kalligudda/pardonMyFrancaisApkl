@@ -15,7 +15,7 @@ void showStyledSnackBar(BuildContext context, String text) {
       ),
     ),
     backgroundColor: Theme.of(context).colorScheme.primary,
-    duration: const Duration(seconds: 2),
+    duration: const Duration(seconds: 5),
     behavior: SnackBarBehavior.floating,
   );
 

@@ -9,18 +9,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LevelProvider with ChangeNotifier {
   List<Levels> _levels = [];
+  String? _errorMessage;
   late String _levelName;
-  Map<String, bool> _mcqProgress = {};
-  Map<String, bool> _pronunciationProgress = {};
 
   String get levelName => _levelName;
 
   void updateLevelName(String newLevelName) {
     _levelName = newLevelName;
-    notifyListeners(); // Notify listeners about the change
+    notifyListeners();
   }
 
   List<Levels> get levels => _levels;
+  String? get errorMessage => _errorMessage;
+
   Future<String?> _getJwtToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
@@ -30,60 +31,31 @@ class LevelProvider with ChangeNotifier {
     try {
       final jwtToken = await _getJwtToken();
       if (jwtToken == null) {
-        throw Exception('JWT token not found');
+        _errorMessage = 'JWT token not found';
+        notifyListeners();
+        return;
       }
+
       String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
-        Uri.parse(
-            'http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/guidebook/$encodedLevelName'),
+        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/guidebook/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },
       );
+
       if (response.statusCode == 200) {
         List<dynamic> jsonResponse = jsonDecode(response.body);
         _levels = jsonResponse.map((json) => Levels.fromJson(json)).toList();
+        _errorMessage = null; // Reset error message on success
         notifyListeners();
       } else {
-        throw Exception('Failed to load guidebooks');
+        _errorMessage = 'Failed to load guidebooks';
+        notifyListeners();
       }
     } catch (error) {
-      rethrow;
+      _errorMessage = 'An error occurred: $error';
+      notifyListeners();
     }
-  }
-  Future<void> _loadProgress() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _mcqProgress = (prefs.getString('mcqProgress') != null)
-        ? Map<String, bool>.from(json.decode(prefs.getString('mcqProgress')!))
-        : {};
-    _pronunciationProgress = (prefs.getString('pronunciationProgress') != null)
-        ? Map<String, bool>.from(json.decode(prefs.getString('pronunciationProgress')!))
-        : {};
-  }
-
-  Future<void> _saveProgress() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('mcqProgress', json.encode(_mcqProgress));
-    prefs.setString('pronunciationProgress', json.encode(_pronunciationProgress));
-  }
-
-  void updateMcqProgress(String levelName, bool completed) {
-    _mcqProgress[levelName] = completed;
-    _saveProgress();
-    notifyListeners();
-  }
-
-  void updatePronunciationProgress(String levelName, bool completed) {
-    _pronunciationProgress[levelName] = completed;
-    _saveProgress();
-    notifyListeners();
-  }
-
-  bool isMcqCompleted(String levelName) {
-    return _mcqProgress[levelName] ?? false;
-  }
-
-  bool isPronunciationCompleted(String levelName) {
-    return _pronunciationProgress[levelName] ?? false;
   }
 }

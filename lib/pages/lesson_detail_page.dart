@@ -18,18 +18,11 @@ class LessonDetailPage extends StatelessWidget {
     required this.lessonName,
   }) : super(key: key);
 
-  // Future<void> _logout(BuildContext context) async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove('token');
-  //   await prefs.remove('user');
-  //   Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
-  // }
-
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? arguments =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    final String levelName = arguments?['levelName']?? 'Level Name';
+    final String levelName = arguments?['levelName'] ?? 'Level Name';
 
     return Scaffold(
       appBar: _buildAppBar(levelName, context),
@@ -40,31 +33,15 @@ class LessonDetailPage extends StatelessWidget {
 
   AppBar _buildAppBar(String levelName, BuildContext context) {
     return AppBar(
-      title: Text(levelName,
-      style: const TextStyle(
-            fontSize: 20,
-          ),
+      title: Text(
+        levelName,
+        style: const TextStyle(
+          fontSize: 20,
         ),
+      ),
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       elevation: 0,
       centerTitle: true,
-      // actions: [
-      //   IconButton(
-      //     onPressed: () {
-      //       Navigator.push(
-      //         context,
-      //         MaterialPageRoute(builder: (context) => const NotificationsPage()),
-      //       );
-      //     },
-      //     icon: const Icon(Icons.notifications),
-      //   ),
-      //   IconButton(
-      //     onPressed: () {
-      //       _logout(context);
-      //     },
-      //     icon: const Icon(Icons.logout),
-      //   ),
-      // ],
     );
   }
 
@@ -90,10 +67,10 @@ class LessonDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildLevelGuideText(context, levelName),
-            const SizedBox(height: 20,),
-            _buildGuidebookContent(lessonName, levelName),
-            const SizedBox(height: 5,),
+            _buildLevelGuideText(context),
+            const SizedBox(height: 20),
+            _buildGuidebookContent(context, lessonName, levelName),
+            const SizedBox(height: 5),
             _buildTakeTestButton(context, lessonName, levelName),
           ],
         ),
@@ -101,7 +78,7 @@ class LessonDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLevelGuideText(BuildContext context, String levelName) {
+  Widget _buildLevelGuideText(BuildContext context) {
     return Center(
       child: Text(
         'Guidebook',
@@ -114,15 +91,15 @@ class LessonDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGuidebookContent(String lessonName, String levelName) {
+  Widget _buildGuidebookContent(BuildContext context, String lessonName, String levelName) {
     return Expanded(
       child: Consumer<LevelProvider>(
         builder: (context, levelProvider, child) {
-          levelProvider.fetchGuidebooks();
-          if (levelProvider.levels.isEmpty) {
-            return const Center(
-              child: Text('No guidebook content available'),
-            );
+          if (levelProvider.levels.isEmpty && levelProvider.errorMessage == null) {
+            levelProvider.fetchGuidebooks();
+            return const Center(child: CircularProgressIndicator());
+          } else if (levelProvider.errorMessage != null) {
+            return Center(child: Text('Error: ${levelProvider.errorMessage}'));
           } else {
             return ListView.builder(
               itemCount: levelProvider.levels[0].guidebookContent.length,
@@ -151,10 +128,10 @@ class LessonDetailPage extends StatelessWidget {
             if (!snapshot.hasData) {
               return const CircularProgressIndicator();
             }
-      
+
             final prefs = snapshot.data!;
             final hasTakenTest = prefs.getBool('mcq_test_${lessonName}_$levelName') ?? false;
-      
+
             return CustomButton(
               text: 'Take Test',
               onPressed: () {
@@ -178,7 +155,7 @@ class LessonDetailPage extends StatelessWidget {
                   );
                 }
               },
-              isLoading: false, // Update this based on your loading state
+              isLoading: false,
             );
           },
         ),

@@ -1,7 +1,8 @@
+// pages/mcq_test_page.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/sublevel.dart';
-import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:http/http.dart' as http;
@@ -28,12 +29,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
   List<Questions>? questions;
   List<int> selectedOptions = [];
   late String levelName;
-  // bool allQuestionsAnswered = false;
-  // bool isLastQuestion = false;
-  // bool isMcqTestAnswered = false;
-  // int correctAnswers = 0;
   double score = 0;
   bool allCorrect = true;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -59,10 +57,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
         List<dynamic> jsonResponse = jsonDecode(response.body);
         return jsonResponse.map((json) => SubLevels.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load guidebooks');
+        throw Exception('Failed to load sublevels');
       }
     } catch (error) {
-      // print('Error fetching sublevels: $error');
+      errorMessage = error.toString();
       rethrow;
     }
   }
@@ -74,9 +72,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   void selectOption(int index) {
     setState(() {
-      // print('Select option called: $index');
       selectedOptions[currentQuestionIndex] = index;
-      // print(selectedOptions);
     });
   }
 
@@ -84,10 +80,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
     setState(() {
       if (currentQuestionIndex < questions!.length - 1) {
         currentQuestionIndex++;
-        // print("Next question index: $currentQuestionIndex");
-      } else {
-        // isLastQuestion = true;
-        // print("Last question reached. Test completed.");
       }
     });
   }
@@ -102,40 +94,34 @@ class _MCQTestPageState extends State<MCQTestPage> {
       allCorrect = false;
     }
 
-    // print("Selected option: $selectedOption");
-    // print("Is correct: $isCorrect");
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(isCorrect ? 'Correct!' : 'Incorrect!',
-          style: TextStyle(
-            fontSize: 24,
-            color: isCorrect ? Colors.green : Colors.red
+          title: Text(
+            isCorrect ? 'Correct!' : 'Incorrect!',
+            style: TextStyle(
+              fontSize: 24,
+              color: isCorrect ? Colors.green : Colors.red,
             ),
           ),
           content: !isCorrect
-              ? Text('The correct answer is: ${questions![currentQuestionIndex].correctOption}',
-              style: TextStyle(
-            fontSize: 18,
-            color: Theme.of(context).colorScheme.onSurface,
-              ),
-            )
+              ? Text(
+                  'The correct answer is: ${questions![currentQuestionIndex].correctOption}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                )
               : null,
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 if (isCorrect) {
-                  // correctAnswers++;
                   score += 100 / questions!.length;
                 }
-                // print('Correct Answers: $correctAnswers');
-                // print('Score: $score');
-                // print(isLastQuestion);
                 if (currentQuestionIndex == questions!.length - 1) {
-                  // print(isLastQuestion);
                   checkAndShowConfirmationDialog();
                 } else {
                   nextQuestion();
@@ -180,36 +166,26 @@ class _MCQTestPageState extends State<MCQTestPage> {
         },
         body: jsonEncode(requestData),
       );
-      // print(response.body);
-      // print(response.statusCode);
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        // print('Score successfully sent to server');
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('userProgress', response.body);
-
-      } else {
-        // print('Failed to send score to server: ${response.statusCode}');
       }
     } catch (error) {
-      // print('Error sending score to server: $error');
+      errorMessage = error.toString();
+      rethrow;
     }
   }
 
   void _submitTest(String levelName, double score) {
-    Provider.of<UserProvider>(context, listen: false).updateLevelScore(levelName, score);
+    Provider.of<UserProvider>(context, listen: false)
+        .updateLevelScore(levelName, score);
   }
 
   void checkAndShowConfirmationDialog() {
     if (selectedOptions.every((element) => element != -1)) {
-      // allQuestionsAnswered = true;
       if (allCorrect) {
         allCorrect = true;
-        // print('All questions were answered correctly.');
-      } else {
-        // print('Not all questions were answered correctly.');
       }
-      // print(score);
       sendScoreToServer();
       _submitTest(levelName, score);
       Future.delayed(const Duration(seconds: 3), () {
@@ -228,8 +204,9 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(levelName,
-         style: const TextStyle(
+        title: Text(
+          levelName,
+          style: const TextStyle(
             fontSize: 20,
           ),
         ),
@@ -239,26 +216,23 @@ class _MCQTestPageState extends State<MCQTestPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder(
+        child: FutureBuilder<List<SubLevels>>(
           future: _futureSubLevels,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.hasData) {
-                final subLevels = snapshot.data as List<SubLevels>;
-                questions = subLevels[0].questions;
-                // print('Questions length: ${questions?.length}');
-                if (selectedOptions.isEmpty) {
-                  selectedOptions = List<int>.filled(questions!.length, -1);
-                }
-                // print(selectedOptions);
-                return buildMCQTestView(context);
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData) {
+              final subLevels = snapshot.data!;
+              questions = subLevels[0].questions;
+              if (selectedOptions.isEmpty) {
+                selectedOptions = List<int>.filled(questions!.length, -1);
               }
+              return buildMCQTestView(context);
+            } else {
+              return const Center(child: CircularProgressIndicator());
             }
-            return const Center(child: CircularProgressIndicator());
           },
         ),
       ),
@@ -324,7 +298,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
                           : Colors.transparent,
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                    child: Text(
+                   child: Text(
                       questions![currentQuestionIndex].options[index],
                       style: TextStyle(
                         color: selectedOptions[currentQuestionIndex] == index
@@ -346,7 +320,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
               if (selectedOptions[currentQuestionIndex] != -1) {
                 submitAnswer();
               }
-            }, isLoading: false,
+            },
+            isLoading: false,
           ),
         ],
       ),

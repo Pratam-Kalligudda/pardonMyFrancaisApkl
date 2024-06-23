@@ -13,8 +13,11 @@ import 'package:french_app/pages/lesson_detail_page.dart';
 import 'package:french_app/pages/mcq_test_page.dart';
 import 'package:french_app/pages/profile_page.dart';
 import 'package:french_app/pages/welcome_page.dart';
+import 'package:french_app/providers/auth_provider.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
 import 'package:french_app/providers/progress_provider.dart';
+import 'package:french_app/providers/sign_up_provider.dart';
+import 'package:french_app/providers/theme_provider.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/theme/dark_theme.dart';
 import 'package:french_app/theme/light_theme.dart';
@@ -31,34 +34,37 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => SignUpProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => LevelProvider()),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Your App',
-        darkTheme: darkTheme,
-        theme: lightTheme,
-        themeMode: ThemeMode.system,
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const WelcomePage(),
-          '/signIn': (context) => const SignInPage(),
-          '/signUp': (context) => const SignUpPage(),
-          '/home': (context) => const HomePage(),
-          '/profile': (context) => const ProfilePage(),
-          '/notifications': (context) => const NotificationsPage(),
-          '/settings': (context) => const SettingsPage(),
-          '/accountsettings': (context) => const AccountSettingsPage(),
-          '/notificationsettings': (context) => const NotificationsSettingsPage(),
-          '/lessonDetail': (context) =>
-              const LessonDetailPage(lessonName: '', levelName: ''),
-          '/mcqTest': (context) => const MCQTestPage(
-                lessonName: '',
-                levelName: '',
-              ),
-          '/audiovisual': (context) => AudioVisualTestPage(lessonName: '', levelName: '',),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Your App',
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: themeProvider.themeMode,
+            initialRoute: '/settings',
+            routes: {
+              '/': (context) => const WelcomePage(),
+              '/signIn': (context) => const SignInPage(),
+              '/signUp': (context) => const SignUpPage(),
+              '/home': (context) => const HomePage(),
+              '/profile': (context) => const ProfilePage(),
+              '/notifications': (context) => const NotificationsPage(),
+              '/settings': (context) => const SettingsPage(),
+              '/accountsettings': (context) => const AccountSettingsPage(),
+              '/notificationsettings': (context) => const NotificationsSettingsPage(),
+              '/lessonDetail': (context) => const LessonDetailPage(lessonName: '', levelName: ''),
+              '/mcqTest': (context) => const MCQTestPage(lessonName: '', levelName: ''),
+              '/audiovisual': (context) => AudioVisualTestPage(lessonName: '', levelName: ''),
+            },
+          );
         },
       ),
     );

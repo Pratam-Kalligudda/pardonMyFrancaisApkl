@@ -1,57 +1,11 @@
-import 'dart:convert';
+//pages/sign_up_page.dart
+
 import 'package:flutter/material.dart';
+import 'package:french_app/providers/sign_up_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:french_app/widgets/snackbar.dart';
 import 'package:french_app/widgets/text_field_input.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-
-class SignUpProvider extends ChangeNotifier {
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
-
-  void setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  Future<void> signUp(BuildContext context, String email, String username, String password) async {
-    setLoading(true);
-
-    try {
-      final response = await http.post(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/signUp'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'email': email,
-          'username': username,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final String token = responseData['token'];
-        final Map<String, dynamic> userData = responseData['userResponse'];
-
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        await prefs.setString('user', jsonEncode(userData));
-
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-      } else {
-        throw Exception('Failed to sign up');
-      }
-    } catch (error) {
-      showStyledSnackBar(context, 'Sign up failed: ${error.toString()}');
-    } finally {
-      setLoading(false);
-    }
-  }
-}
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -71,12 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
     _passwordController.dispose();
     _emailController.dispose();
     super.dispose();
-  }
-
-  bool _detailsAreNotEntered() {
-    return _usernameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty;
   }
 
   @override
@@ -114,15 +62,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   const SizedBox(height: 30),
                   TextFieldInput(
-                    textEditingController: _emailController,
-                    hintText: "Email",
-                    textInputType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFieldInput(
                     textEditingController: _usernameController,
                     hintText: "Username",
                     textInputType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFieldInput(
+                    textEditingController: _emailController,
+                    hintText: "Email",
+                    textInputType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 12),
                   TextFieldInput(
@@ -134,18 +82,28 @@ class _SignUpPageState extends State<SignUpPage> {
                   const SizedBox(height: 60),
                   CustomButton(
                     text: "Sign Up",
-                    onPressed: () {
-                      if (_detailsAreNotEntered()) {
-                         showStyledSnackBar(context, 'Please enter your username, email, and password to sign up.');
-                         return;
-                      }
-                      provider.signUp(
-                        context,
-                        _emailController.text,
-                        _usernameController.text,
-                        _passwordController.text,
-                      );
-                    },
+                    onPressed: provider.isLoading
+                        ? null
+                        : () {
+                            final username = _usernameController.text.trim();
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text.trim();
+
+                            if (username.isEmpty) {
+                              showStyledSnackBar(context, 'Please enter your username.');
+                            } else if (email.isEmpty) {
+                              showStyledSnackBar(context, 'Please enter your email.');
+                            } else if (password.isEmpty) {
+                              showStyledSnackBar(context, 'Please enter your password.');
+                            } else {
+                              provider.signUp(
+                                context,
+                                email,
+                                username,
+                                password,
+                              );
+                            }
+                          },
                     isLoading: provider.isLoading,
                   ),
                   const SizedBox(height: 30),

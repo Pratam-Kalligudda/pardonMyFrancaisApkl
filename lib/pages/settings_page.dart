@@ -1,9 +1,12 @@
-//pages/setting_pge.dart
+//pages/setting_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/account_settings_page.dart';
 import 'package:french_app/pages/notification_setttings_page.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
+import 'package:french_app/providers/theme_provider.dart'; // Import your ThemeProvider
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -19,7 +22,7 @@ class SettingsPage extends StatelessWidget {
       ),
       body: _buildSettingsContent(context),
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 2, // Current index for the settings page
+        currentIndex: 2,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -38,33 +41,64 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildSettingsContent(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        ListTile(
-          title: const Text('Account Settings'),
-          leading: const Icon(Icons.account_circle),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AccountSettingsPage()),
-            );
-          },
-        ),
-        const Divider(),
-        ListTile(
-          title: const Text('Notifications Settings'),
-          leading: const Icon(Icons.notifications),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NotificationsSettingsPage()),
-            );
-          },
-        ),
-        const Divider(),
-        // Add more settings options as needed
-      ],
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final themeProvider = Provider.of<ThemeProvider>(context);
+
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final packageInfo = snapshot.data!;
+        return ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            ListTile(
+              title: const Text('Account Settings'),
+              leading: const Icon(Icons.account_circle),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AccountSettingsPage()),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text('Notifications Settings'),
+              leading: const Icon(Icons.notifications),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NotificationsSettingsPage()),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text('Dark Mode'),
+              leading: const Icon(Icons.dark_mode),
+              trailing: Switch(
+                value: themeProvider.themeMode == ThemeMode.dark,
+                onChanged: (value) {
+                  if (value) {
+                    themeProvider.setThemeMode(ThemeMode.dark);
+                  } else {
+                    themeProvider.setThemeMode(ThemeMode.light);
+                  }
+                },
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text('App Version'),
+              subtitle: Text('Version ${packageInfo.version}'),
+              leading: const Icon(Icons.info),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,8 +1,7 @@
 //pages/notifications_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:french_app/widgets/bottom_navigation_bar.dart'; // Import your custom bottom navigation bar widget
-
+import 'package:french_app/widgets/bottom_navigation_bar.dart';
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({Key? key}) : super(key: key);
 
@@ -36,7 +35,6 @@ class NotificationsPage extends StatelessWidget {
   }
 
   Widget _buildNotificationsContent(BuildContext context) {
-    // Your logic to fetch notifications can go here
     List<String> notifications = [];
 
     if (notifications.isEmpty) {
@@ -51,7 +49,6 @@ class NotificationsPage extends StatelessWidget {
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(notifications[index]),
-            // Customize notification tile as needed
           );
         },
       );
