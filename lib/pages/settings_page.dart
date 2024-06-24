@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:french_app/pages/account_settings_page.dart';
+import 'package:french_app/pages/appearance_settings_page.dart';
 import 'package:french_app/pages/notification_setttings_page.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
-import 'package:french_app/providers/theme_provider.dart'; // Import your ThemeProvider
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -44,7 +43,6 @@ class SettingsPage extends StatelessWidget {
     return FutureBuilder<PackageInfo>(
       future: PackageInfo.fromPlatform(),
       builder: (context, snapshot) {
-        final themeProvider = Provider.of<ThemeProvider>(context);
 
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
@@ -77,18 +75,14 @@ class SettingsPage extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
-              title: const Text('Dark Mode'),
-              leading: const Icon(Icons.dark_mode),
-              trailing: Switch(
-                value: themeProvider.themeMode == ThemeMode.dark,
-                onChanged: (value) {
-                  if (value) {
-                    themeProvider.setThemeMode(ThemeMode.dark);
-                  } else {
-                    themeProvider.setThemeMode(ThemeMode.light);
-                  }
-                },
-              ),
+              title: const Text('Appearance'),
+              leading: const Icon(Icons.palette),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AppearanceSettingsPage()),
+                );
+              },
             ),
             const Divider(),
             ListTile(
@@ -96,6 +90,7 @@ class SettingsPage extends StatelessWidget {
               subtitle: Text('Version ${packageInfo.version}'),
               leading: const Icon(Icons.info),
             ),
+            const Divider(),
           ],
         );
       },

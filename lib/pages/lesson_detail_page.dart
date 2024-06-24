@@ -91,7 +91,7 @@ class LessonDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGuidebookContent(BuildContext context, String lessonName, String levelName) {
+  Widget _buildGuidebookContent(context, lessonName, levelName) {
     return Expanded(
       child: Consumer<LevelProvider>(
         builder: (context, levelProvider, child) {

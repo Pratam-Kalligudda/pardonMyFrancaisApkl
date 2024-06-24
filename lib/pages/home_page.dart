@@ -1,6 +1,7 @@
 //pages/home_page.dart
 
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
@@ -9,8 +10,10 @@ import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../providers/progress_provider.dart'; // Import ProgressProvider
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -28,13 +31,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Provider.of<UserProvider>(context, listen: false).loadUserDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).loadUserDetails();
+      Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
+    });
     _fetchData();
   }
 
   Future<void> _fetchData() async {
     try {
-      final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/guidebook'));
+      final response =
+          await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/guidebook'));
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
         List<Levels> levels = jsonData.map((data) => Levels.fromJson(data)).toList();
@@ -104,10 +111,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
+    return Consumer2<UserProvider, ProgressProvider>(
+      builder: (context, userProvider, progressProvider, child) {
         final User? user = userProvider.user;
-        final levelScores = userProvider.levelScores;
+        final levelScores = progressProvider.levelScores; // Access levelScores from ProgressProvider
 
         if (_isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -118,6 +125,8 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (user != null) {
+          print('Guidebook data length: ${guidebookData.length}');
+          print('Level scores: $levelScores');
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),

@@ -1,4 +1,4 @@
-//pages/sign_up_page.dart
+// pages/sign_up_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:french_app/providers/sign_up_provider.dart';
@@ -32,110 +32,123 @@ class _SignUpPageState extends State<SignUpPage> {
     return ChangeNotifierProvider(
       create: (_) => SignUpProvider(),
       child: Scaffold(
-        body: Container(
-          padding: const EdgeInsets.all(16),
-          width: double.infinity,
-          child: Consumer<SignUpProvider>(
-            builder: (context, provider, _) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      children: [
-                        const TextSpan(text: "Sign up now to access immersive "),
-                        TextSpan(
-                          text: "French",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+        body: Center(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Consumer<SignUpProvider>(
+                  builder: (context, provider, _) {
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
                         ),
-                        const TextSpan(text: " lessons"),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  TextFieldInput(
-                    textEditingController: _usernameController,
-                    hintText: "Username",
-                    textInputType: TextInputType.text,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFieldInput(
-                    textEditingController: _emailController,
-                    hintText: "Email",
-                    textInputType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFieldInput(
-                    textEditingController: _passwordController,
-                    hintText: "Password",
-                    textInputType: TextInputType.text,
-                  ),
-                  const SizedBox(height: 60),
-                  CustomButton(
-                    text: "Sign Up",
-                    onPressed: provider.isLoading
-                        ? null
-                        : () {
-                            final username = _usernameController.text.trim();
-                            final email = _emailController.text.trim();
-                            final password = _passwordController.text.trim();
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                                children: [
+                                  const TextSpan(text: "Sign up now to access immersive "),
+                                  TextSpan(
+                                    text: "French",
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  const TextSpan(text: " lessons"),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            TextFieldInput(
+                              textEditingController: _usernameController,
+                              hintText: "Username",
+                              textInputType: TextInputType.text,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFieldInput(
+                              textEditingController: _emailController,
+                              hintText: "Email",
+                              textInputType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 12),
+                            TextFieldInput(
+                              textEditingController: _passwordController,
+                              hintText: "Password",
+                              textInputType: TextInputType.text,
+                            ),
+                            const SizedBox(height: 60),
+                            CustomButton(
+                              text: "Sign Up",
+                              onPressed: provider.isLoading
+                                  ? null
+                                  : () {
+                                      final username = _usernameController.text.trim();
+                                      final email = _emailController.text.trim();
+                                      final password = _passwordController.text.trim();
 
-                            if (username.isEmpty) {
-                              showStyledSnackBar(context, 'Please enter your username.');
-                            } else if (email.isEmpty) {
-                              showStyledSnackBar(context, 'Please enter your email.');
-                            } else if (password.isEmpty) {
-                              showStyledSnackBar(context, 'Please enter your password.');
-                            } else {
-                              provider.signUp(
-                                context,
-                                email,
-                                username,
-                                password,
-                              );
-                            }
-                          },
-                    isLoading: provider.isLoading,
-                  ),
-                  const SizedBox(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Already have an account?",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Theme.of(context).colorScheme.onBackground,
+                                      if (username.isEmpty) {
+                                        showStyledSnackBar(context, 'Please enter your username.');
+                                      } else if (email.isEmpty) {
+                                        showStyledSnackBar(context, 'Please enter your email.');
+                                      } else if (password.isEmpty) {
+                                        showStyledSnackBar(context, 'Please enter your password.');
+                                      } else {
+                                        provider.signUp(
+                                          context,
+                                          email,
+                                          username,
+                                          password,
+                                        );
+                                      }
+                                    },
+                              isLoading: provider.isLoading,
+                            ),
+                            const SizedBox(height: 30),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Already have an account?",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Theme.of(context).colorScheme.onBackground,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: provider.isLoading
+                                      ? null
+                                      : () {
+                                          Navigator.pushNamed(context, '/signIn');
+                                        },
+                                  child: Text(
+                                    "Sign In",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      TextButton(
-                        onPressed: provider.isLoading
-                            ? null
-                            : () {
-                                Navigator.pushNamed(context, '/signIn');
-                              },
-                        child: Text(
-                          "Sign In",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),

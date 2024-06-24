@@ -1,23 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/providers/progress_provider.dart';
+import 'package:french_app/widgets/snackbar.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key});
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Map<String, dynamic> _userProgress = {};
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -25,44 +22,40 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isNameEditing = false;
   bool _isBioEditing = false;
   bool _isLocationEditing = false;
-  bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
 
   String? _selectedAvatar;
 
   final List<String> _avatars = [
-  'assets/avatars/1.png',
-  'assets/avatars/2.png',
-  'assets/avatars/3.png',
-  'assets/avatars/4.png',
-  'assets/avatars/5.png',
-  'assets/avatars/6.png',
-  'assets/avatars/7.png',
-];
+    'assets/avatars/1.png',
+    'assets/avatars/2.png',
+    'assets/avatars/3.png',
+    'assets/avatars/4.png',
+    'assets/avatars/5.png',
+    'assets/avatars/6.png',
+    'assets/avatars/7.png',
+  ];
+
+  final Map<String, String> _achievementImages = {
+    'Novice Learner': 'assets/achievements/bronze_medal.png',
+    'Dedicated Learner': 'assets/achievements/silver_medal.png',
+    'Master Learner': 'assets/achievements/gold_medal.png',
+    'Streak Beginner': 'assets/achievements/bronze_ribbon.png',
+    'Streak Pro': 'assets/achievements/silver_ribbon.png',
+    'Streak Champion': 'assets/achievements/gold_ribbon.png',
+    'Point Collector': 'assets/achievements/trophy.png',
+  };
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
   }
 
   Future<void> _loadData() async {
     await _loadUserDetails();
-    _loadUserProgress();
-  }
-
-  Future<void> _loadUserProgress() async {
-    final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/getUserProgress'));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _userProgress = jsonDecode(response.body);
-      });
-    } else {
-      throw Exception('Failed to load user progress');
-    }
+    Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
   }
 
   Future<void> _loadUserDetails() async {
@@ -73,7 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       final response = await http.get(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/user'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -82,18 +75,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-        setState(() {
-          _nameController.text = userData['name'];
-          _bioController.text = userData['bio'];
-          _locationController.text = userData['location'];
-        });
+        _nameController.text = userData['name'] ?? '';
+        _bioController.text = userData['bio'] ?? '';
+        _locationController.text = userData['location'] ?? '';
+        if (userData['profilePhoto'] != null) {
+          _selectedAvatar = 'assets/avatars/${userData['profilePhoto']}.png';
+        } else {
+          _selectedAvatar = null;
+        }
       } else if (response.statusCode == 404) {
-        print('User profile not found for username');
+        showStyledSnackBar(context, 'User profile not found');
       } else {
-        print('Failed to load user profile data. Status code: ${response.statusCode}');
+        showStyledSnackBar(context, 'Failed to load user profile data. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error loading user profile data: $error');
+      showStyledSnackBar(context, 'Error loading user profile data: $error');
     }
   }
 
@@ -105,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
       }
 
       final response = await http.post(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/updateProfile'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/updateProfile'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -115,17 +111,18 @@ class _ProfilePageState extends State<ProfilePage> {
             {'field': 'name', 'value': _nameController.text},
             {'field': 'bio', 'value': _bioController.text},
             {'field': 'location', 'value': _locationController.text},
+            if (_selectedAvatar != null) {'field': 'profilePhoto', 'value': _selectedAvatar!.split('/').last.split('.').first},
           ]
         }),
       );
 
       if (response.statusCode == 200) {
-        print('Profile updated successfully');
+        showStyledSnackBar(context, 'Profile updated successfully');
       } else {
-        print('Failed to update profile. Status code: ${response.statusCode}');
+        showStyledSnackBar(context, 'Failed to update profile. Status code: ${response.statusCode}');
       }
     } catch (error) {
-      print('Error updating profile: $error');
+      showStyledSnackBar(context, 'Error updating profile: $error');
       rethrow;
     }
   }
@@ -136,18 +133,95 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveChanges() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() {});
 
     await _updateProfile();
 
     setState(() {
-      _isLoading = false;
       _isNameEditing = false;
       _isBioEditing = false;
       _isLocationEditing = false;
     });
+  }
+
+  Widget _buildProgressList(ProgressProvider progressData) {
+    if (progressData.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return Card(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProgressListItem('Current Level', progressData.currentLevel.toString()),
+            _buildProgressListItem('Total Levels Completed', progressData.totalLevelsCompleted.toString()),
+            _buildProgressListItem('Streak', progressData.streak.toString()),
+            _buildProgressListItem('Points Earned', progressData.pointsEarned.toString()),
+            _buildProgressListItem('Highest Combo', progressData.highestCombo.toString()),
+            _buildProgressListItem('Last Lesson Date', progressData.lastLessonDate),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Level Scores',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ..._buildLevelScores(progressData.levelScores),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Achievements',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            ..._buildAchievements(progressData.achievements),
+          ],
+        ),
+      );
+    }
+  }
+
+  List<Widget> _buildLevelScores(Map<String, double> levelScores) {
+    return levelScores.entries.map((entry) {
+      return ListTile(
+        title: Text('Level ${entry.key}'),
+        trailing: Text('${entry.value.toStringAsFixed(2)} points'),
+      );
+    }).toList();
+  }
+
+  List<Widget> _buildAchievements(List<String> achievements) {
+    return achievements.map((achievement) {
+      return ListTile(
+        leading: _achievementImages.containsKey(achievement)
+          ? Image.asset(
+              _achievementImages[achievement]!,
+              width: 40,
+              height: 40,
+            )
+          : null,
+        title: Text(achievement),
+      );
+    }).toList();
+  }
+
+  Widget _buildProgressListItem(String title, String value) {
+    return ListTile(
+      title: Text(title),
+      trailing: Text(value),
+    );
+  }
+
+  void _onBottomNavTap(int index) {
+    if (index == 0) {
+      Navigator.pushReplacementNamed(context, '/home');
+    } else if (index == 1) {
+      // Current page
+    } else if (index == 2) {
+      Navigator.pushReplacementNamed(context, '/settings');
+    }
   }
 
   String? _validateName(String? value) {
@@ -170,32 +244,151 @@ class _ProfilePageState extends State<ProfilePage> {
     return null;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final progressData = Provider.of<ProgressProvider>(context);
-    
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile',
-        style: TextStyle(
-            fontSize: 20,
+  Widget _buildEditableField(
+    String label,
+    TextEditingController controller,
+    IconData iconData,
+    bool isFieldEditing,
+    String? Function(String?) validator,
+    VoidCallback onPressed,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        if (!isFieldEditing) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              // Continued from previous code snippet...
+
+                return AlertDialog(
+                  title: Text(
+                    'Edit $label',
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                  content: TextFormField(
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    controller: controller,
+                    decoration: InputDecoration(
+                      labelText: label,
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Theme.of(context).scaffoldBackgroundColor,
+                    ),
+                    validator: validator,
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          onPressed();
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        },
+        child: InputDecorator(
+          decoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+            filled: true,
+            fillColor: Theme.of(context).scaffoldBackgroundColor,
+          ),
+          child: Text(
+            controller.text,
+            style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
           ),
         ),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      );
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Profile'),
+          automaticallyImplyLeading: true,
+          centerTitle: true,
+        ),
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: 1, // Set the current index to ProfilePage index
+          onTap: _onBottomNavTap,
+        ),
+        body: Consumer<ProgressProvider>(
+          builder: (context, progressData, _) {
+            return Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16.0),
                 children: [
-                  _buildProfileImage(),
-                  const SizedBox(height: 30),
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: _selectedAvatar != null
+                              ? AssetImage(_selectedAvatar!)
+                              : const AssetImage('assets/icons/profile.png'),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                            child: IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Theme.of(context).colorScheme.primary,
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Select Avatar'),
+                                      content: SizedBox(
+                                        width: double.maxFinite,
+                                        child: GridView.count(
+                                          crossAxisCount: 3,
+                                          children: List.generate(_avatars.length, (index) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _selectedAvatar = _avatars[index];
+                                                });
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Image.asset(
+                                                  _avatars[index],
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   _buildEditableField(
                     'Name',
                     _nameController,
@@ -244,301 +437,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  Divider(),
-                  Center(
-                    child: Text(
-                      'User Progress',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
                   _buildProgressList(progressData),
                 ],
               ),
-            ),
-          ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushNamed(context, '/home');
-              break;
-            case 1:
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/settings');
-              break;
-          }
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+    }
   }
-
-  Widget _buildProfileImage() {
-    return Center(
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 70,
-            backgroundImage: _selectedAvatar != null
-              ? AssetImage(_selectedAvatar!)
-                : const AssetImage('assets/icons/profile.png') as ImageProvider,
-          ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).primaryColor,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                        ),
-                        itemCount: _avatars.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedAvatar = _avatars[index];
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Image.asset(_avatars[index]),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableField(
-    String label,
-    TextEditingController controller,
-    IconData iconData,
-    bool isFieldEditing,
-    String? Function(String?) validator,
-    VoidCallback onPressed,
-  ) {
-    return GestureDetector(
-      onTap: () {
-        if (!isFieldEditing) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Edit $label',
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                ),
-                content: TextFormField(
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                  controller: controller,
-                  decoration: InputDecoration(
-                    labelText: label,
-                    border: const OutlineInputBorder(),
-                    
-                  ),
-                  validator: validator,
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (validator(controller.text) == null) {
-                        onPressed();
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      },
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-          filled: true,
-          fillColor: Theme.of(context).scaffoldBackgroundColor,
-        ),
-        child: Text(
-          controller.text,
-          style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProgressList(ProgressProvider progressData) {
-    if (progressData.isLoading) {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
-  } else {
-    return ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: [
-        // Group 1: Level Progress
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Level Progress',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Current Level'),
-                    Text('${progressData.userProgress['currentLevel']}'),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Total Levels Completed'),
-                    Text('${progressData.userProgress['totalLevelsCompleted']}'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Group 2: Streak and Combo
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Streak and Combo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Streak'),
-                    Text('${progressData.userProgress['streak']}'),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Highest Combo'),
-                    Text('${progressData.userProgress['highestCombo']}'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Group 3: Scores and Points
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Scores and Points',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Level Scores'),
-                    Text('${progressData.userProgress['levelScores']}'),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Points Earned'),
-                    Text('${progressData.userProgress['pointsEarned']}'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Group 4: Achievements
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Achievements',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Achievements: ${progressData.userProgress['achievements'].join(', ')}',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Group 5: Last Lesson Date
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Last Lesson Date',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Last Lesson Date: ${progressData.userProgress['lastLessonDate']}',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-}

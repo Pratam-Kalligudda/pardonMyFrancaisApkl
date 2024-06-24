@@ -29,7 +29,7 @@ class UserProvider with ChangeNotifier {
   Map<String, double> get levelScores => _levelScores;
 
   // API endpoint for user data
-  static const String _userEndpoint = 'ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/user';
+  static const String _userEndpoint = 'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user';
 
   // Method to get JWT token from SharedPreferences
   Future<String?> _getJwtToken() async {

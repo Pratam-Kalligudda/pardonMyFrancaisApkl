@@ -135,24 +135,26 @@ class _LoginScreenState extends State<SignInPage> {
                       textInputType: TextInputType.text,
                     ),
                     const SizedBox(height: 60),
-                    CustomButton(
-                      text: 'Sign In',
-                      onPressed: auth.isLoading
-                          ? null
-                          : () {
-                              final username = _usernameController.text.trim();
-                              final password = _passwordController.text.trim();
-                              if (username.isEmpty) {
-                                _showSignInSnackbar(
-                                    context, 'Please enter username');
-                              } else if (password.isEmpty) {
-                                _showSignInSnackbar(
-                                    context, 'Please enter password');
-                              } else {
-                                _signIn(username, password, auth);
-                              }
-                            },
-                      isLoading: auth.isLoading,
+                    Center( // Center widget added here
+                      child: CustomButton(
+                        text: 'Sign In',
+                        onPressed: auth.isLoading
+                            ? null
+                            : () {
+                                final username = _usernameController.text.trim();
+                                final password = _passwordController.text.trim();
+                                if (username.isEmpty) {
+                                  _showSignInSnackbar(
+                                      context, 'Please enter username');
+                                } else if (password.isEmpty) {
+                                  _showSignInSnackbar(
+                                      context, 'Please enter password');
+                                } else {
+                                  _signIn(username, password, auth);
+                                }
+                              },
+                        isLoading: auth.isLoading,
+                      ),
                     ),
                     const SizedBox(height: 30),
                     Row(

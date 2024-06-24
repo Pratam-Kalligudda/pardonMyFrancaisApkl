@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:french_app/models/level.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LevelProvider with ChangeNotifier {
@@ -30,7 +29,7 @@ class LevelProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   // API base URL
-  static const String _apiBaseUrl = 'ec2-3-83-31-77.compute-1.amazonaws.com:8080 ';
+  static const String _apiBaseUrl = 'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/guidebook';
 
   // Method to get JWT token from SharedPreferences
   Future<String?> _getJwtToken() async {
@@ -50,7 +49,7 @@ class LevelProvider with ChangeNotifier {
 
       final String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
-        Uri.parse('$_apiBaseUrl/api/guidebook/$encodedLevelName'),
+        Uri.parse('$_apiBaseUrl/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },

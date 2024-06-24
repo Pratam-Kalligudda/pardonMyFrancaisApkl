@@ -22,7 +22,7 @@ class AccountSettingsPage extends StatelessWidget {
       }
 
       final response = await http.get(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/user'),
+        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -99,8 +99,12 @@ class AccountSettingsPage extends StatelessWidget {
           title: const Text('Change Username'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start, // Aligns content to the start (left)
             children: [
-              Text('Current username: $currentUsername'),
+              Align(
+                alignment: Alignment.centerLeft, // Aligns text to the left
+                child: Text('Current username: $currentUsername'),
+              ),
               TextField(
                 controller: newUsernameController,
                 decoration: const InputDecoration(

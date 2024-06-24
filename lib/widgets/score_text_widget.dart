@@ -16,7 +16,7 @@ class ScoreTextWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Text(
-        "$score",
+        score.toStringAsFixed(4),
         style: TextStyle(
           fontSize: 18,
           color: Theme.of(context).colorScheme.primary,
