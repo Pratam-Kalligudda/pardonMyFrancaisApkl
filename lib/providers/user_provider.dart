@@ -22,12 +22,6 @@ class UserProvider with ChangeNotifier {
   // Getter for error message
   String? get errorMessage => _errorMessage;
 
-  // Map to hold level scores
-  final Map<String, double> _levelScores = {};
-
-  // Getter for level scores
-  Map<String, double> get levelScores => _levelScores;
-
   // API endpoint for user data
   static const String _userEndpoint = 'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user';
 
@@ -35,12 +29,6 @@ class UserProvider with ChangeNotifier {
   Future<String?> _getJwtToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
-  }
-
-  // Method to update level score and notify listeners
-  void updateLevelScore(String levelName, double score) {
-    _levelScores[levelName] = score;
-    notifyListeners();
   }
 
   // Method to load user details from the API

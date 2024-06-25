@@ -4,10 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:french_app/models/questions.dart';
 import 'package:french_app/models/sublevel.dart';
-import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MCQTestPage extends StatefulWidget {
@@ -177,18 +175,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
     }
   }
 
-  void _submitTest(String levelName, double score) {
-    Provider.of<UserProvider>(context, listen: false)
-        .updateLevelScore(levelName, score);
-  }
-
   void checkAndShowConfirmationDialog() {
     if (selectedOptions.every((element) => element != -1)) {
       if (allCorrect) {
         allCorrect = true;
       }
       sendScoreToServer();
-      _submitTest(levelName, score);
       Future.delayed(const Duration(seconds: 3), () {
         Navigator.of(context).pop();
         Navigator.pushNamed(context, '/audiovisual');

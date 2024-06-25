@@ -2,27 +2,30 @@
 
 import 'package:flutter/material.dart';
 import 'package:french_app/providers/guidebook_provider.dart';
+import 'package:french_app/providers/progress_provider.dart';
 import 'package:provider/provider.dart';
 import 'circle_avatar_with_border.dart';
-import 'score_text_widget.dart';
+// import 'score_text_widget.dart';
 
 /// Widget to display a tile representing a level with details.
 class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
   final int index;
-  final double score;
+  // final double score;
 
   const LevelTile({
     Key? key,
     required this.name,
     required this.subName,
     required this.index,
-    required this.score,
+    // required this.score,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final progressProvider = Provider.of<ProgressProvider>(context, listen: false);
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: InkWell(
@@ -59,7 +62,7 @@ class LevelTile extends StatelessWidget {
                   ),
                 ),
               ),
-              ScoreTextWidget(score: score),
+              // ScoreTextWidget(score: score),
             ],
           ),
         ),

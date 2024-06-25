@@ -1,19 +1,17 @@
 //pages/home_page.dart
 
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
 import 'package:french_app/pages/notificatons_page.dart';
+// import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../providers/progress_provider.dart'; // Import ProgressProvider
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -33,15 +31,14 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<UserProvider>(context, listen: false).loadUserDetails();
-      Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
+      // Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
     });
     _fetchData();
   }
 
   Future<void> _fetchData() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/guidebook'));
+      final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/guidebook'));
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
         List<Levels> levels = jsonData.map((data) => Levels.fromJson(data)).toList();
@@ -111,22 +108,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Consumer2<UserProvider, ProgressProvider>(
-      builder: (context, userProvider, progressProvider, child) {
-        final User? user = userProvider.user;
-        final levelScores = progressProvider.levelScores; // Access levelScores from ProgressProvider
+     return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        final user = userProvider.user;
+        // final levelScores = progressProvider.levelScores;
 
-        if (_isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (_errorMessage != null) {
-          return Center(child: Text(_errorMessage!));
-        }
+        if (userProvider.isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
         if (user != null) {
-          print('Guidebook data length: ${guidebookData.length}');
-          print('Level scores: $levelScores');
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -157,12 +148,13 @@ class _HomePageState extends State<HomePage> {
                       separatorBuilder: (context, index) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         var level = guidebookData[index];
-                        double score = levelScores[level.levelName] ?? 0;
+                        // double score = levelScores[level.levelName] ?? 0;
+                        // print('Level Name: ${level.levelName}, Score: $score');
                         return LevelTile(
                           name: level.levelName,
                           subName: level.subtitle,
                           index: index + 1,
-                          score: score,
+                          // score: score,
                         );
                       },
                     ),
