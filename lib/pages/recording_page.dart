@@ -40,6 +40,7 @@ class _RecordingPageState extends State<RecordingPage> {
       setState(() {});
     } catch (e) {
       print('Error initializing camera: $e');
+      print('---------------------------------------------------------------------------------------------------------------------');
     }
   }
 
@@ -52,6 +53,7 @@ class _RecordingPageState extends State<RecordingPage> {
         });
       } catch (e) {
         print('Error starting video recording: $e');
+        print('---------------------------------------------------------------------------------------------------------------------');
       }
     }
   }
@@ -64,15 +66,17 @@ class _RecordingPageState extends State<RecordingPage> {
           _isRecording = false;
         });
         print('Video recorded to: ${video.path}');
+        print('---------------------------------------------------------------------------------------------------------------------');
         await extractAudioAndSend(video.path);
       } catch (e) {
         print('Error stopping video recording: $e');
+        print('---------------------------------------------------------------------------------------------------------------------');
       }
     }
   }
 
   Future<void> extractAudioAndSend(String videoPath) async {
-    final flutterFFmpeg = FlutterFFmpeg();
+  final flutterFFmpeg = FlutterFFmpeg();
     final outputAudioPath = videoPath.replaceAll('.mp4', '.mp3');
     final arguments = ['-i', videoPath, '-vn', '-acodec', 'copy', outputAudioPath];
 
@@ -80,6 +84,7 @@ class _RecordingPageState extends State<RecordingPage> {
       await flutterFFmpeg.executeWithArguments(arguments);
     } catch (e) {
       print('Error extracting audio: $e');
+      print('---------------------------------------------------------------------------------------------------------------------');
       return;
     }
 
@@ -92,34 +97,44 @@ class _RecordingPageState extends State<RecordingPage> {
       var response = await request.send();
 
       if (response.statusCode == 200) {
-        setState(() async {
-          _accuracyScore = double.parse(await response.stream.bytesToString());
-          _accuracyDisplayed = true;
-        });
+        final responseBody = await response.stream.bytesToString();
+        final accuracyScore = double.tryParse(responseBody);
 
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Pronunciation Accuracy'),
-            content: Text('Your pronunciation accuracy score is: $_accuracyScore%'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _accuracyDisplayed = false;
-                  });
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        if (accuracyScore!= null) {
+          setState(() {
+            _accuracyScore = accuracyScore;
+            _accuracyDisplayed = true;
+          });
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Pronunciation Accuracy'),
+              content: Text('Your pronunciation accuracy score is: $_accuracyScore%'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      _accuracyDisplayed = false;
+                    });
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          print('Failed to parse accuracy score from response');
+          print('---------------------------------------------------------------------------------------------------------------------');
+        }
       } else {
         print('Failed to get accuracy score. Status code: ${response.statusCode}');
+        print('---------------------------------------------------------------------------------------------------------------------');
       }
     } catch (e) {
       print('Error sending audio to server: $e');
+      print('---------------------------------------------------------------------------------------------------------------------');
     }
   }
 

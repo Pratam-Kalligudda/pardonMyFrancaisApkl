@@ -111,7 +111,8 @@ class _ProfilePageState extends State<ProfilePage> {
             {'field': 'name', 'value': _nameController.text},
             {'field': 'bio', 'value': _bioController.text},
             {'field': 'location', 'value': _locationController.text},
-            if (_selectedAvatar != null) {'field': 'profilePhoto', 'value': _selectedAvatar!.split('/').last.split('.').first},
+            if (_selectedAvatar!= null)
+              {'field': 'profilePhoto', 'value': _selectedAvatar!.split('/').last.split('.').first},
           ]
         }),
       );

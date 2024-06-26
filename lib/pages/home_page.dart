@@ -9,6 +9,7 @@ import 'package:french_app/pages/notificatons_page.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
+import 'package:french_app/widgets/levels_list.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -141,23 +142,24 @@ class _HomePageState extends State<HomePage> {
                   if (guidebookData.isEmpty)
                     const Center(child: Text('No levels available.'))
                   else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: guidebookData.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        var level = guidebookData[index];
+                    LevelsList(),
+                    // ListView.separated(
+                      // shrinkWrap: true,
+                      // physics: const NeverScrollableScrollPhysics(),
+                      // itemCount: guidebookData.length,
+                      // separatorBuilder: (context, index) => const SizedBox(height: 10),
+                      // itemBuilder: (context, index) {
+                      //   var level = guidebookData[index];
                         // double score = levelScores[level.levelName] ?? 0;
                         // print('Level Name: ${level.levelName}, Score: $score');
-                        return LevelTile(
-                          name: level.levelName,
-                          subName: level.subtitle,
-                          index: index + 1,
-                          // score: score,
-                        );
-                      },
-                    ),
+                        // return LevelTile(
+                        //   name: level.levelName,
+                        //   subName: level.subtitle,
+                        //   index: index + 1,
+                        //   // score: score,
+                        // );
+                    //   },
+                    // ),
                 ],
               ),
             ),

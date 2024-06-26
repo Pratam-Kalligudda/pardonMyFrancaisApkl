@@ -28,7 +28,7 @@ class SettingsPage extends StatelessWidget {
               Navigator.pushNamed(context, '/home');
               break;
             case 1:
-              Navigator.pushNamed(context, '/notifications');
+              Navigator.pushNamed(context, '/profile');
               break;
             case 2:
               // Do nothing as it's the current page

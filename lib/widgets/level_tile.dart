@@ -12,14 +12,14 @@ class LevelTile extends StatelessWidget {
   final String name;
   final String subName;
   final int index;
-  // final double score;
+  final double score;
 
   const LevelTile({
     Key? key,
     required this.name,
     required this.subName,
     required this.index,
-    // required this.score,
+    required this.score,
   }) : super(key: key);
 
   @override
@@ -63,6 +63,13 @@ class LevelTile extends StatelessWidget {
                 ),
               ),
               // ScoreTextWidget(score: score),
+              Text(
+                score.toStringAsFixed(1),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ],
           ),
         ),
