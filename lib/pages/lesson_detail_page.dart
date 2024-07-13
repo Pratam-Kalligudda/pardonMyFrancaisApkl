@@ -8,7 +8,7 @@ import 'package:french_app/widgets/lesson_detail_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LessonDetailPage extends StatelessWidget {
+class LessonDetailPage extends StatefulWidget {
   final String lessonName;
   final String levelName;
 
@@ -19,11 +19,26 @@ class LessonDetailPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _LessonDetailPageState createState() => _LessonDetailPageState();
+}
+
+class _LessonDetailPageState extends State<LessonDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final levelProvider = Provider.of<LevelProvider>(context, listen: false);
+      levelProvider.updateLevelName(widget.levelName);
+      levelProvider.fetchGuidebooks();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(levelName, context),
+      appBar: _buildAppBar(widget.levelName, context),
       bottomNavigationBar: _buildBottomNavigationBar(context),
-      body: _buildBody(context, levelName, lessonName),
+      body: _buildBody(context, widget.levelName, widget.lessonName),
     );
   }
 
@@ -87,12 +102,11 @@ class LessonDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGuidebookContent(context, lessonName, levelName) {
+  Widget _buildGuidebookContent(BuildContext context, String lessonName, String levelName) {
     return Expanded(
       child: Consumer<LevelProvider>(
         builder: (context, levelProvider, child) {
           if (levelProvider.levels.isEmpty && levelProvider.errorMessage == null) {
-            levelProvider.fetchGuidebooks();
             return const Center(child: CircularProgressIndicator());
           } else if (levelProvider.errorMessage != null) {
             return Center(child: Text('Error: ${levelProvider.errorMessage}'));
