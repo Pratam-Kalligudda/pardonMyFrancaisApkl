@@ -76,7 +76,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Change Username',
             style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14,
             ),
           ),
@@ -90,7 +90,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Change Password',
             style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14,
             ),
           ),
@@ -104,7 +104,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Delete Account',
             style: TextStyle(
-            color: Theme.of(context).colorScheme.onSecondary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14,
             ),
           ),
@@ -142,7 +142,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 child: Text(
                   'Current username: $currentUsername',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondary,
+                    color: Theme.of(context).colorScheme.secondary,
                     fontSize: 14,
                   ),
                 ),

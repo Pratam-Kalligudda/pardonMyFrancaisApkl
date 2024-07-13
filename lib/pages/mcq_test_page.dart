@@ -313,15 +313,6 @@ class _MCQTestPageState extends State<MCQTestPage> {
             onPressed: () {
               if (selectedOptions[currentQuestionIndex] == -1) {
                 showStyledSnackBar(context, 'Please select an option before proceeding');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onError),
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
               } else {
                 submitAnswer();
               }
