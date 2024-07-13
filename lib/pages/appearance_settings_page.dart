@@ -8,6 +8,7 @@ class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _AppearanceSettingsPageState createState() => _AppearanceSettingsPageState();
 }
 
@@ -17,7 +18,12 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Appearance'),
+        title: const Text(
+          'Appearance',
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0, 
         centerTitle: true,
@@ -32,7 +38,19 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
       padding: const EdgeInsets.all(16.0),
       children: [
         SwitchListTile(
-          title: const Text('Dark Mode'),
+          title: themeProvider.themeMode == ThemeMode.dark
+           ? const Text(
+                'Light Mode',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              )
+            : const Text(
+                'Dark Mode',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
           value: themeProvider.themeMode == ThemeMode.dark,
           onChanged: (value) {
             if (value) {
@@ -41,7 +59,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               themeProvider.setThemeMode(ThemeMode.light);
             }
           },
-          secondary: const Icon(Icons.dark_mode),
+          secondary: themeProvider.themeMode == ThemeMode.dark
+           ? const Icon(Icons.light_mode)
+            : const Icon(Icons.dark_mode),
         ),
       const Divider(),
       ],

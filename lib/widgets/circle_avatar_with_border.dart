@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-/// Widget to display a circular avatar with a border and index number.
 class CircleAvatarWithBorder extends StatelessWidget {
   final int index;
 
@@ -14,8 +13,8 @@ class CircleAvatarWithBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 50,
-      height: 50,
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
@@ -27,7 +26,7 @@ class CircleAvatarWithBorder extends StatelessWidget {
         child: Text(
           "$index",
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           ),

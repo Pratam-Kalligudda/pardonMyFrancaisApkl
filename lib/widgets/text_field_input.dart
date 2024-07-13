@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-/// Widget for text input with optional password visibility toggle.
 class TextFieldInput extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isPassword;
@@ -29,11 +28,11 @@ class _TextFieldInputState extends State<TextFieldInput> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
-        style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurface,  fontSize: 16),
         controller: widget.textEditingController,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          labelText: widget.hintText, // Optional: Use labelText for accessibility
+          labelText: widget.hintText,
           border: UnderlineInputBorder(
             borderSide: BorderSide(
               color: Theme.of(context).colorScheme.surface,

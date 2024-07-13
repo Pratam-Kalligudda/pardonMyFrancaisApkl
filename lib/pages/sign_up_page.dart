@@ -85,6 +85,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               textEditingController: _passwordController,
                               hintText: "Password",
                               textInputType: TextInputType.text,
+                              isPassword: true,
                             ),
                             const SizedBox(height: 60),
                             CustomButton(
@@ -120,7 +121,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 Text(
                                   "Already have an account?",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     color: Theme.of(context).colorScheme.onBackground,
                                   ),
                                 ),
@@ -133,7 +134,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   child: Text(
                                     "Sign In",
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                       color: Theme.of(context).colorScheme.primary,
                                     ),

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-/// Widget to display details of a lesson with pronunciation support.
 class LessonDetailTile extends StatefulWidget {
   final String phrase;
   final String pronunciation;
@@ -37,7 +36,6 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     super.dispose();
   }
 
-  /// Initialize FlutterTts and set up handlers.
   Future<void> _initTts() async {
     flutterTts.setStartHandler(() {
       setState(() {
@@ -64,7 +62,6 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     await flutterTts.awaitSpeakCompletion(true);
   }
 
-  /// Fetch and play the pronunciation of the lesson phrase.
   Future<void> _fetchAndPlayPronunciation() async {
     await flutterTts.speak(widget.phrase);
   }
@@ -85,11 +82,11 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildText(widget.phrase, FontWeight.bold, 20, context),
+              _buildText(widget.phrase, FontWeight.bold, 16, context),
               const SizedBox(height: 8),
-              _buildText('Pronunciation: ${widget.pronunciation}', FontWeight.normal, 16, context),
+              _buildText('Pronunciation: ${widget.pronunciation}', FontWeight.normal, 14, context),
               const SizedBox(height: 4),
-              _buildText('Translation: ${widget.translation}', FontWeight.normal, 16, context),
+              _buildText('Translation: ${widget.translation}', FontWeight.normal, 14, context),
             ],
           ),
         ),
@@ -97,7 +94,6 @@ class _LessonDetailTileState extends State<LessonDetailTile> {
     );
   }
 
-  /// Helper method to build text with specified style.
   Widget _buildText(String text, FontWeight fontWeight, double fontSize, BuildContext context) {
     return Text(
       text,

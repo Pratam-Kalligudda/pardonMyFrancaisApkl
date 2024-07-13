@@ -1,6 +1,7 @@
 // providers/user_provider.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,30 +9,21 @@ import 'dart:convert';
 import 'package:french_app/models/user.dart';
 
 class UserProvider with ChangeNotifier {
-  // State variable to hold user data
+  String apiUrl = dotenv.env['MY_API_URL']!;
+  
   User? _user;
-  // State variable to indicate loading status
   bool _isLoading = false;
-  // Variable to hold error messages
   String? _errorMessage;
 
-  // Getter for user data
   User? get user => _user;
-  // Getter for loading status
   bool get isLoading => _isLoading;
-  // Getter for error message
   String? get errorMessage => _errorMessage;
 
-  // API endpoint for user data
-  static const String _userEndpoint = 'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user';
-
-  // Method to get JWT token from SharedPreferences
   Future<String?> _getJwtToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  // Method to load user details from the API
   Future<void> loadUserDetails() async {
     _setLoading(true);
     try {
@@ -42,7 +34,7 @@ class UserProvider with ChangeNotifier {
       }
 
       final response = await http.get(
-        Uri.parse(_userEndpoint),
+        Uri.parse('$apiUrl/user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -53,7 +45,7 @@ class UserProvider with ChangeNotifier {
         final Map<String, dynamic> userData = json.decode(response.body);
         final User user = User.fromJson(userData);
         _user = user;
-        _setErrorMessage(null); // Clear any previous error messages
+        _setErrorMessage(null);
       } else if (response.statusCode == 404) {
         _setErrorMessage('User profile not found');
       } else {
@@ -66,13 +58,11 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // Method to update loading status and notify listeners
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
   }
 
-  // Method to update error message and notify listeners
   void _setErrorMessage(String? message) {
     _errorMessage = message;
     notifyListeners();

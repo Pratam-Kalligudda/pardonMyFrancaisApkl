@@ -1,6 +1,10 @@
-import 'dart:io';
+//page/recording_page.dart
+
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -9,10 +13,12 @@ class RecordingPage extends StatefulWidget {
   const RecordingPage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _RecordingPageState createState() => _RecordingPageState();
 }
 
 class _RecordingPageState extends State<RecordingPage> {
+  String apiUrl = dotenv.env['MY_API_URL']!;
   late CameraController _controller;
   Future<void>? _initializeControllerFuture;
   bool _isRecording = false;
@@ -39,8 +45,7 @@ class _RecordingPageState extends State<RecordingPage> {
       await _initializeControllerFuture;
       setState(() {});
     } catch (e) {
-      print('Error initializing camera: $e');
-      print('---------------------------------------------------------------------------------------------------------------------');
+      return;
     }
   }
 
@@ -52,8 +57,7 @@ class _RecordingPageState extends State<RecordingPage> {
           _isRecording = true;
         });
       } catch (e) {
-        print('Error starting video recording: $e');
-        print('---------------------------------------------------------------------------------------------------------------------');
+        return;
       }
     }
   }
@@ -65,12 +69,9 @@ class _RecordingPageState extends State<RecordingPage> {
         setState(() {
           _isRecording = false;
         });
-        print('Video recorded to: ${video.path}');
-        print('---------------------------------------------------------------------------------------------------------------------');
         await extractAudioAndSend(video.path);
       } catch (e) {
-        print('Error stopping video recording: $e');
-        print('---------------------------------------------------------------------------------------------------------------------');
+        return;
       }
     }
   }
@@ -83,15 +84,11 @@ class _RecordingPageState extends State<RecordingPage> {
     try {
       await flutterFFmpeg.executeWithArguments(arguments);
     } catch (e) {
-      print('Error extracting audio: $e');
-      print('---------------------------------------------------------------------------------------------------------------------');
       return;
     }
 
-    final audioFile = File(outputAudioPath);
-
     try {
-      var request = http.MultipartRequest('POST', Uri.parse('http://ec2-18-208-214-241.compute-1.amazonaws.com:8080/api/upload'));
+      var request = http.MultipartRequest('POST', Uri.parse('$apiUrl/upload'));
       request.files.add(await http.MultipartFile.fromPath('file', outputAudioPath));
 
       var response = await request.send();
@@ -125,16 +122,11 @@ class _RecordingPageState extends State<RecordingPage> {
             ),
           );
         } else {
-          print('Failed to parse accuracy score from response');
-          print('---------------------------------------------------------------------------------------------------------------------');
         }
       } else {
-        print('Failed to get accuracy score. Status code: ${response.statusCode}');
-        print('---------------------------------------------------------------------------------------------------------------------');
       }
     } catch (e) {
-      print('Error sending audio to server: $e');
-      print('---------------------------------------------------------------------------------------------------------------------');
+      return;
     }
   }
 

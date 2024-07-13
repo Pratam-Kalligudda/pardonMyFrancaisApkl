@@ -1,6 +1,7 @@
 // main.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:french_app/pages/account_settings_page.dart';
 import 'package:french_app/pages/audio_visual_test_page.dart';
 import 'package:french_app/pages/notification_setttings_page.dart';
@@ -21,9 +22,11 @@ import 'package:french_app/providers/theme_provider.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/theme/dark_theme.dart';
 import 'package:french_app/theme/light_theme.dart';
+import 'package:french_app/widgets/slide_up_page_route.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -36,12 +39,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => SignUpProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(context)),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => LevelProvider()),
         ChangeNotifierProvider(create: (_) => ProgressProvider()),
       ],
-      child: Consumer<ThemeProvider>(
+     child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
@@ -50,19 +53,52 @@ class MyApp extends StatelessWidget {
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             initialRoute: '/',
-            routes: {
-              '/': (context) => const WelcomePage(),
-              '/signIn': (context) => const SignInPage(),
-              '/signUp': (context) => const SignUpPage(),
-              '/home': (context) => const HomePage(),
-              '/profile': (context) => ProfilePage(),
-              '/notifications': (context) => const NotificationsPage(),
-              '/settings': (context) => const SettingsPage(),
-              '/accountsettings': (context) => const AccountSettingsPage(),
-              '/notificationsettings': (context) => const NotificationsSettingsPage(),
-              '/lessonDetail': (context) => const LessonDetailPage(lessonName: '', levelName: ''),
-              '/mcqTest': (context) => const MCQTestPage(lessonName: '', levelName: ''),
-              '/audiovisual': (context) => AudioVisualTestPage(lessonName: '', levelName: ''),
+            onGenerateRoute: (settings) {
+              final args = settings.arguments as Map<String, dynamic>?;
+
+              switch (settings.name) {
+                case '/':
+                  return SlideUpPageRoute(page: const WelcomePage());
+                case '/signIn':
+                  return SlideUpPageRoute(page: const SignInPage());
+                case '/signUp':
+                  return SlideUpPageRoute(page: const SignUpPage());
+                case '/home':
+                  return SlideUpPageRoute(page: const HomePage());
+                case '/profile':
+                  return SlideUpPageRoute(page: const ProfilePage());
+                case '/notifications':
+                  return SlideUpPageRoute(page: const NotificationsPage());
+                case '/settings':
+                  return SlideUpPageRoute(page: const SettingsPage());
+                case '/accountsettings':
+                  return SlideUpPageRoute(page: const AccountSettingsPage());
+                case '/notificationsettings':
+                  return SlideUpPageRoute(page: const NotificationsSettingsPage());
+                case '/lessonDetail':
+                  return SlideUpPageRoute(
+                    page: LessonDetailPage(
+                      lessonName: args?['lessonName'] ?? '',
+                      levelName: args?['levelName'] ?? '',
+                    ),
+                  );
+                case '/mcqTest':
+                  return SlideUpPageRoute(
+                    page: MCQTestPage(
+                      lessonName: args?['lessonName'] ?? '',
+                      levelName: args?['levelName'] ?? '',
+                    ),
+                  );
+                case '/audiovisual':
+                  return SlideUpPageRoute(
+                    page: AudioVisualTestPage(
+                      lessonName: args?['lessonName'] ?? '',
+                      levelName: args?['levelName'] ?? '',
+                    ),
+                  );
+                default:
+                  return MaterialPageRoute(builder: (context) => const WelcomePage());
+              }
             },
           );
         },

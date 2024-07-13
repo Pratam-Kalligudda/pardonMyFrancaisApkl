@@ -20,10 +20,6 @@ class LessonDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? arguments =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    final String levelName = arguments?['levelName'] ?? 'Level Name';
-
     return Scaffold(
       appBar: _buildAppBar(levelName, context),
       bottomNavigationBar: _buildBottomNavigationBar(context),
@@ -36,7 +32,7 @@ class LessonDetailPage extends StatelessWidget {
       title: Text(
         levelName,
         style: const TextStyle(
-          fontSize: 20,
+          fontSize: 18,
         ),
       ),
       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -83,7 +79,7 @@ class LessonDetailPage extends StatelessWidget {
       child: Text(
         'Guidebook',
         style: TextStyle(
-          fontSize: 24,
+          fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.onBackground,
         ),

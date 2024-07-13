@@ -1,31 +1,32 @@
 // providers/sign_up_provider.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:french_app/widgets/snackbar.dart';
 
 class SignUpProvider extends ChangeNotifier {
-  // State variable to indicate loading status
+  String apiUrl = dotenv.env['MY_API_URL']!;
+  
   bool _isLoading = false;
 
-  // Getter for loading status
   bool get isLoading => _isLoading;
 
-  // Method to update loading status and notify listeners
   void setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
   }
 
-  // Method to handle user sign-up
   Future<void> signUp(BuildContext context, String email, String username, String password) async {
     setLoading(true);
 
     try {
       final response = await http.post(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/signUp'),
+        Uri.parse('$apiUrl/signUp'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

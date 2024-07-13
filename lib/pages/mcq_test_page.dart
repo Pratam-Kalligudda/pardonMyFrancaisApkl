@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:french_app/models/questions.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:french_app/widgets/custom_button.dart';
@@ -23,6 +24,7 @@ class MCQTestPage extends StatefulWidget {
 }
 
 class _MCQTestPageState extends State<MCQTestPage> {
+  String apiUrl = dotenv.env['MY_API_URL']!;
   late Future<List<SubLevels>> _futureSubLevels;
   int currentQuestionIndex = 0;
   List<Questions>? questions;
@@ -47,7 +49,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
       }
       String encodedLevelName = Uri.encodeComponent(levelName);
       final response = await http.get(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/sublevels/$encodedLevelName'),
+        Uri.parse('$apiUrl/sublevels/$encodedLevelName'),
         headers: <String, String>{
           'Authorization': 'Bearer $jwtToken',
         },
@@ -158,7 +160,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/updateUserProgress'),
+        Uri.parse('$apiUrl/updateUserProgress'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $jwtToken',
@@ -190,17 +192,12 @@ class _MCQTestPageState extends State<MCQTestPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String lvlName = args?['levelName'] ?? '';
-    levelName = lvlName;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
           levelName,
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 18,
           ),
         ),
         elevation: 0,
@@ -241,7 +238,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
             child: Text(
               'Multiple Choice Questions',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -253,7 +250,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
             child: Text(
               'Select the correct option for the question from the given options',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
@@ -263,7 +260,7 @@ class _MCQTestPageState extends State<MCQTestPage> {
           Text(
             questions![currentQuestionIndex].question,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onBackground,
             ),
@@ -294,11 +291,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
                    child: Text(
                       questions![currentQuestionIndex].options[index],
                       style: TextStyle(
-                        color: selectedOptions[currentQuestionIndex] == index
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onSurface,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -308,13 +302,26 @@ class _MCQTestPageState extends State<MCQTestPage> {
           ),
           const SizedBox(height: 20),
           CustomButton(
-            text: 'Submit Answer',
+            text: currentQuestionIndex == questions!.length - 1 ? 'Submit' : 'Next',
             onPressed: () {
-              if (selectedOptions[currentQuestionIndex] != -1) {
-                submitAnswer();
+              if (selectedOptions[currentQuestionIndex] == -1) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Please select an option before proceeding',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onError),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              } else {
+                if (currentQuestionIndex == questions!.length - 1) {
+                  submitAnswer();
+                } else {
+                  nextQuestion();
+                }
               }
-            },
-            isLoading: false,
+            }, isLoading: false,
           ),
         ],
       ),

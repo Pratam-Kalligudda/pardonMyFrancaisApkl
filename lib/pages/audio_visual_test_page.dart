@@ -53,7 +53,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
         title: Text(
           '${widget.levelName} Pronunciation Test',
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 18,
           ),
         ),
         elevation: 0,
@@ -74,7 +74,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
             Text(
               'French Pronunciation Test',
               style: TextStyle(
-                fontSize: 26.0,
+                fontSize: 18.0,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
@@ -90,7 +90,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
             Text(
               'Play Audio',
               style: TextStyle(
-                fontSize: 20.0,
+                fontSize: 14.0,
                 color: Theme.of(context).colorScheme.secondary,
               ),
               textAlign: TextAlign.center,
@@ -100,7 +100,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
               icon: Icon(isPlaying ? Icons.stop : Icons.volume_up),
               onPressed: () {
                 if (!isPlaying) {
-                  _speakPhrase(_getFrenchPronunciation(levelProvider));
+                  _speakPhrase(_getFrenchWord(levelProvider));
                 } else {
                   flutterTts.stop();
                 }
@@ -122,7 +122,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
           ? levelProvider.levels[0].guidebookContent[0].frenchWord
           : 'French Word',
       style: TextStyle(
-        fontSize: 24.0,
+        fontSize: 16.0,
         fontWeight: FontWeight.bold,
         color: Theme.of(context).colorScheme.onBackground,
       ),
@@ -136,7 +136,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
           ? levelProvider.levels[0].guidebookContent[0].englishTranslation
           : 'English Translation',
       style: TextStyle(
-        fontSize: 18.0,
+        fontSize: 14.0,
         color: Theme.of(context).colorScheme.onBackground,
       ),
       textAlign: TextAlign.center,
@@ -149,7 +149,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
           ? levelProvider.levels[0].guidebookContent[0].frenchPronunciation
           : 'French Pronunciation',
       style: TextStyle(
-        fontSize: 18.0,
+        fontSize: 14.0,
         fontStyle: FontStyle.italic,
         color: Theme.of(context).colorScheme.onBackground,
       ),
@@ -157,10 +157,10 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
     );
   }
 
-  String _getFrenchPronunciation(LevelProvider levelProvider) {
+  String _getFrenchWord(LevelProvider levelProvider) {
     return levelProvider.levels.isNotEmpty && levelProvider.levels[0].guidebookContent.isNotEmpty
-        ? levelProvider.levels[0].guidebookContent[0].frenchPronunciation
-        : 'French Pronunciation';
+        ? levelProvider.levels[0].guidebookContent[0].frenchWord
+        : 'French Word';
   }
 
   Widget _buildInstructions() {
@@ -169,7 +169,7 @@ class _AudioVisualTestPageState extends State<AudioVisualTestPage> {
       child: Text(
         'As a final part of completing the lesson we will check your pronunciation and tell you how accurate your pronunciation is',
         style: TextStyle(
-          fontSize: 18.0,
+          fontSize: 14.0,
           color: Theme.of(context).colorScheme.onSurface,
         ),
         textAlign: TextAlign.center,

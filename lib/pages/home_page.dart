@@ -1,15 +1,17 @@
 //pages/home_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:french_app/models/level.dart';
 import 'package:french_app/models/user.dart';
 import 'package:french_app/pages/notificatons_page.dart';
-// import 'package:french_app/providers/progress_provider.dart';
+import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/providers/user_provider.dart';
 import 'package:french_app/widgets/bottom_navigation_bar.dart';
 import 'package:french_app/widgets/level_tile.dart';
-import 'package:french_app/widgets/levels_list.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -21,39 +23,57 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver{
+  String apiUrl = dotenv.env['MY_API_URL']!;
   int _currentIndex = 0;
   List<Levels> guidebookData = [];
-  bool _isLoading = true;
-  String? _errorMessage;
 
-  @override
+ @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).loadUserDetails();
-      // Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
-    });
+    WidgetsBinding.instance.addObserver(this);
     _fetchData();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Future.microtask(() => _loadUserData());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _fetchData();
+      Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    await Provider.of<UserProvider>(context, listen: false).loadUserDetails();
+    await Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
+  }
+  
   Future<void> _fetchData() async {
     try {
-      final response = await http.get(Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/guidebook'));
+      final response = await http.get(Uri.parse('$apiUrl/guidebook'));
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
         List<Levels> levels = jsonData.map((data) => Levels.fromJson(data)).toList();
         setState(() {
           guidebookData = levels;
-          _isLoading = false;
         });
       } else {
         throw Exception('Failed to load levels');
       }
     } catch (error) {
       setState(() {
-        _errorMessage = error.toString();
-        _isLoading = false;
       });
     }
   }
@@ -82,7 +102,7 @@ class _HomePageState extends State<HomePage> {
       title: const Text(
         'Pardon My Francais',
         style: TextStyle(
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -109,14 +129,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildBody(BuildContext context) {
-     return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
+     return Consumer2<UserProvider, ProgressProvider>(
+      builder: (context, userProvider, progressProvider, child) {
         final user = userProvider.user;
-        // final levelScores = progressProvider.levelScores;
+        final levelScores = progressProvider.levelScores;
 
-        if (userProvider.isLoading) {
-        return const Center(child: CircularProgressIndicator());
-      }
+        if (userProvider.isLoading || progressProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
         if (user != null) {
           return SingleChildScrollView(
@@ -131,7 +151,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     'Levels',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -142,24 +162,7 @@ class _HomePageState extends State<HomePage> {
                   if (guidebookData.isEmpty)
                     const Center(child: Text('No levels available.'))
                   else
-                    LevelsList(),
-                    // ListView.separated(
-                      // shrinkWrap: true,
-                      // physics: const NeverScrollableScrollPhysics(),
-                      // itemCount: guidebookData.length,
-                      // separatorBuilder: (context, index) => const SizedBox(height: 10),
-                      // itemBuilder: (context, index) {
-                      //   var level = guidebookData[index];
-                        // double score = levelScores[level.levelName] ?? 0;
-                        // print('Level Name: ${level.levelName}, Score: $score');
-                        // return LevelTile(
-                        //   name: level.levelName,
-                        //   subName: level.subtitle,
-                        //   index: index + 1,
-                        //   // score: score,
-                        // );
-                    //   },
-                    // ),
+                    _buildLevelTiles(guidebookData, levelScores),
                 ],
               ),
             ),
@@ -179,7 +182,7 @@ class _HomePageState extends State<HomePage> {
           text: TextSpan(
             style: TextStyle(
               color: Theme.of(context).colorScheme.onBackground,
-              fontSize: 32,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
             ),
             children: [
@@ -198,10 +201,30 @@ class _HomePageState extends State<HomePage> {
           "Date Joined: ${user.registrationDate}",
           style: TextStyle(
             color: Theme.of(context).colorScheme.onBackground,
-            fontSize: 16,
+            fontSize: 14,
           ),
         ),
       ],
+    );
+  }
+
+
+  Widget _buildLevelTiles(List<Levels> guidebookData, Map<String, double> levelScores) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: guidebookData.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 1),
+      itemBuilder: (context, index) {
+        var level = guidebookData[index];
+        double score = levelScores[(index + 1).toString()] ?? 0;
+        return LevelTile(
+          name: level.levelName,
+          subName: level.subtitle,
+          index: index + 1,
+          score: score,
+        );
+      },
     );
   }
 
@@ -215,10 +238,10 @@ class _HomePageState extends State<HomePage> {
           // Do nothing as it's the current page
           break;
         case 1:
-          Navigator.pushNamed(context, '/profile');
+          Navigator.popAndPushNamed(context, '/profile');
           break;
         case 2:
-          Navigator.pushNamed(context, '/settings');
+          Navigator.popAndPushNamed(context, '/settings');
           break;
         default:
       }

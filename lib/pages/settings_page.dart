@@ -14,7 +14,12 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text(
+          'Settings',
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
@@ -25,10 +30,10 @@ class SettingsPage extends StatelessWidget {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home');
+              Navigator.popAndPushNamed(context, '/home');
               break;
             case 1:
-              Navigator.pushNamed(context, '/profile');
+              Navigator.popAndPushNamed(context, '/profile');
               break;
             case 2:
               // Do nothing as it's the current page
@@ -45,7 +50,7 @@ class SettingsPage extends StatelessWidget {
       builder: (context, snapshot) {
 
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         final packageInfo = snapshot.data!;
@@ -53,7 +58,12 @@ class SettingsPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           children: [
             ListTile(
-              title: const Text('Account Settings'),
+              title: const Text(
+                'Account Settings',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
               leading: const Icon(Icons.account_circle),
               onTap: () {
                 Navigator.push(
@@ -64,7 +74,12 @@ class SettingsPage extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
-              title: const Text('Notifications Settings'),
+              title: const Text(
+                'Notifications Settings',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
               leading: const Icon(Icons.notifications),
               onTap: () {
                 Navigator.push(
@@ -75,7 +90,12 @@ class SettingsPage extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
-              title: const Text('Appearance'),
+              title: const Text(
+                'Appearance',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
               leading: const Icon(Icons.palette),
               onTap: () {
                 Navigator.push(
@@ -86,8 +106,18 @@ class SettingsPage extends StatelessWidget {
             ),
             const Divider(),
             ListTile(
-              title: const Text('App Version'),
-              subtitle: Text('Version ${packageInfo.version}'),
+              title: const Text(
+                'App Version',
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              subtitle: Text(
+                'Version ${packageInfo.version}',
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+              ),
               leading: const Icon(Icons.info),
             ),
             const Divider(),

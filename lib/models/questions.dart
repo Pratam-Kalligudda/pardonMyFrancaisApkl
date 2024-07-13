@@ -1,6 +1,5 @@
 // models/questions.dart
 
-/// Represents a quiz question with options and correct answer.
 class Questions {
   final String question;
   final List<String> options;
@@ -12,7 +11,6 @@ class Questions {
     required this.correctOption,
   });
 
-  /// Converts a JSON map into a Questions object.
   factory Questions.fromJson(Map<String, dynamic> json) {
     return Questions(
       question: json["question"],
@@ -21,7 +19,6 @@ class Questions {
     );
   }
 
-  /// Converts a Questions object into a JSON map.
   Map<String, dynamic> toJson() => {
         "question": question,
         "options": List<dynamic>.from(options.map((x) => x)),

@@ -1,13 +1,23 @@
 //pages/account_settings_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:french_app/widgets/snackbar.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AccountSettingsPage extends StatelessWidget {
+class AccountSettingsPage extends StatefulWidget {
   const AccountSettingsPage({Key? key}) : super(key: key);
+
+  @override
+  State<AccountSettingsPage> createState() => _AccountSettingsPageState();
+}
+
+class _AccountSettingsPageState extends State<AccountSettingsPage> {
+  String apiUrl = dotenv.env['MY_API_URL']!;
 
   Future<String?> _getJwtToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -22,7 +32,7 @@ class AccountSettingsPage extends StatelessWidget {
       }
 
       final response = await http.get(
-        Uri.parse('http://ec2-3-83-31-77.compute-1.amazonaws.com:8080/api/user'),
+        Uri.parse('$apiUrl/user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -44,7 +54,12 @@ class AccountSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Account Settings'),
+        title: const Text(
+          'Account Settings',
+          style: TextStyle(
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
@@ -58,8 +73,12 @@ class AccountSettingsPage extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       children: [
         ListTile(
-          title: const Text('Change Username'),
-          subtitle: const Text('Change your username'),
+          title: const Text(
+            'Change Username',
+            style: TextStyle(
+            fontSize: 14,
+            ),
+          ),
           leading: const Icon(Icons.person),
           onTap: () {
             _showChangeUsernameDialog(context);
@@ -67,8 +86,12 @@ class AccountSettingsPage extends StatelessWidget {
         ),
         const Divider(),
         ListTile(
-          title: const Text('Change Password'),
-          subtitle: const Text('Change your password'),
+          title: const Text(
+            'Change Password',
+            style: TextStyle(
+            fontSize: 14,
+            ),
+          ),
           leading: const Icon(Icons.lock),
           onTap: () {
             _showChangePasswordDialog(context);
@@ -76,8 +99,12 @@ class AccountSettingsPage extends StatelessWidget {
         ),
         const Divider(),
         ListTile(
-          title: const Text('Delete Account'),
-          subtitle: const Text('Delete your account'),
+          title: const Text(
+            'Delete Account',
+            style: TextStyle(
+            fontSize: 14,
+            ),
+          ),
           leading: const Icon(Icons.delete),
           onTap: () {
             _showDeleteAccountDialog(context);
@@ -96,14 +123,24 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Change Username'),
+          title: const Text(
+            'Change your username',
+            style: TextStyle(
+            fontSize: 18,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start, // Aligns content to the start (left)
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Align(
-                alignment: Alignment.centerLeft, // Aligns text to the left
-                child: Text('Current username: $currentUsername'),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Current username: $currentUsername',
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
               ),
               TextField(
                 controller: newUsernameController,
@@ -145,7 +182,7 @@ class AccountSettingsPage extends StatelessWidget {
       }
 
       final response = await http.post(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
+        Uri.parse('$apiUrl/updateProfile'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -176,7 +213,12 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Change Password'),
+          title: const Text(
+            'Change your password',
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -240,7 +282,7 @@ class AccountSettingsPage extends StatelessWidget {
       }
 
       final response = await http.post(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/updateProfile'),
+        Uri.parse('$apiUrl/updateProfile'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -255,8 +297,8 @@ class AccountSettingsPage extends StatelessWidget {
       if (response.statusCode == 200) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.remove('token');
-        showStyledSnackBar(context, 'Password updated successfully');
-        Navigator.of(context).pushNamedAndRemoveUntil('/signIn', (route) => false);
+        showStyledSnackBar(context, 'Password updated successfully. Please login again.');
+        await Navigator.pushNamedAndRemoveUntil(context, '/signIn', (route) => false);
       } else if (response.statusCode == 401) {
         showStyledSnackBar(context, 'Unauthorized request. Please log in again.');
       } else {
@@ -272,8 +314,18 @@ class AccountSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Account'),
-          content: const Text('Are you sure you want to delete your account?'),
+          title: const Text(
+            'Delete Account',
+            style: TextStyle(
+              fontSize: 18,
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to delete your account?',
+            style: TextStyle(
+              fontSize: 14,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -301,7 +353,7 @@ class AccountSettingsPage extends StatelessWidget {
       }
 
       final response = await http.delete(
-        Uri.parse('http://ec2-52-91-198-166.compute-1.amazonaws.com:8080/api/deleteUser'),
+        Uri.parse('$apiUrl/deleteUser'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -311,8 +363,8 @@ class AccountSettingsPage extends StatelessWidget {
       if (response.statusCode == 200) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.remove('token');
-        Navigator.pop(context);
-        Navigator.pushReplacementNamed(context, '/');
+        showStyledSnackBar(context, 'Account deleted successfully.');
+        await Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       } else {
         showStyledSnackBar(context, 'Failed to delete account. Status code: ${response.statusCode}');
       }

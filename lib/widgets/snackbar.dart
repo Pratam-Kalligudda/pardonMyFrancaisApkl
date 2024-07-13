@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 
-/// Shows a styled SnackBar with customizable text and optional text style.
 void showStyledSnackBar(BuildContext context, String text, {TextStyle? textStyle}) {
   final defaultTextStyle = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: Theme.of(context).colorScheme.background,
   );
 
@@ -18,7 +17,7 @@ void showStyledSnackBar(BuildContext context, String text, {TextStyle? textStyle
       ),
     ),
     backgroundColor: Theme.of(context).colorScheme.primary,
-    duration: const Duration(seconds: 10),
+    duration: const Duration(seconds: 5),
     behavior: SnackBarBehavior.floating,
   );
 

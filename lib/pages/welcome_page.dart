@@ -1,5 +1,7 @@
 //pages/welcome_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -98,7 +100,7 @@ class _WelcomePageState extends State<WelcomePage> {
           child: Text(
             "Sign Up",
             style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.primary),
           ),
@@ -125,7 +127,7 @@ class _WelcomePageState extends State<WelcomePage> {
           child: Text(
             "Sign In",
             style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onPrimary),
           ),

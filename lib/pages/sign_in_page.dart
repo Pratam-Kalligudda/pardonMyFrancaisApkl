@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,8 @@ class SignInPage extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<SignInPage> {
+  String apiUrl = dotenv.env['MY_API_URL']!;
+  
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -52,7 +55,7 @@ class _LoginScreenState extends State<SignInPage> {
     auth.setLoading(true);
 
     final Uri url = Uri.parse(
-        'http://ec2-3-83-31-77.compute-1.amazonaws.com:8080 /api/logIn');
+        '$apiUrl/logIn');
     final Map<String, String> requestBody = {
       'username': username,
       'password': password,
@@ -133,9 +136,10 @@ class _LoginScreenState extends State<SignInPage> {
                       textEditingController: _passwordController,
                       hintText: "Password",
                       textInputType: TextInputType.text,
+                      isPassword: true,
                     ),
                     const SizedBox(height: 60),
-                    Center( // Center widget added here
+                    Center(
                       child: CustomButton(
                         text: 'Sign In',
                         onPressed: auth.isLoading
@@ -163,7 +167,7 @@ class _LoginScreenState extends State<SignInPage> {
                         Text(
                           "Don't have an account?",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             color: Theme.of(context).colorScheme.onBackground,
                           ),
                         ),
@@ -176,7 +180,7 @@ class _LoginScreenState extends State<SignInPage> {
                           child: Text(
                             "Sign Up",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Theme.of(context).colorScheme.primary,
                             ),

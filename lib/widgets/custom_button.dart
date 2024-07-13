@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-/// Custom button widget that shows loading indicator when isLoading is true.
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -44,7 +43,7 @@ class CustomButton extends StatelessWidget {
           : Text(
               text,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onPrimary,
               ),
