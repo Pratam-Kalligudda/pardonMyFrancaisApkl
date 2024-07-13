@@ -289,14 +289,16 @@ class _MCQTestPageState extends State<MCQTestPage> {
                       ),
                       color: selectedOptions[currentQuestionIndex] == index
                           ? Theme.of(context).colorScheme.secondary
-                          : Colors.transparent,
+                          : Theme.of(context).colorScheme.surface
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                    child: Text(
                       questions![currentQuestionIndex].options[index],
                       style: TextStyle(
                         fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: selectedOptions[currentQuestionIndex] == index
+                          ? Theme.of(context).colorScheme.surface
+                          : Theme.of(context).colorScheme.onSurface
                       ),
                     ),
                   ),
