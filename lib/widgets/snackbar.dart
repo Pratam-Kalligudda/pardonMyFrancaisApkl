@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 void showStyledSnackBar(BuildContext context, String text, {TextStyle? textStyle}) {
   final defaultTextStyle = TextStyle(
     fontSize: 12,
-    color: Theme.of(context).colorScheme.background,
+    color: Theme.of(context).colorScheme.onError,
   );
 
   final snackBar = SnackBar(
@@ -16,7 +16,7 @@ void showStyledSnackBar(BuildContext context, String text, {TextStyle? textStyle
         style: textStyle ?? defaultTextStyle,
       ),
     ),
-    backgroundColor: Theme.of(context).colorScheme.primary,
+    backgroundColor: Theme.of(context).colorScheme.error,
     duration: const Duration(seconds: 5),
     behavior: SnackBarBehavior.floating,
   );

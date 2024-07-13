@@ -7,6 +7,7 @@ import 'package:french_app/models/questions.dart';
 import 'package:french_app/models/sublevel.dart';
 import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
+import 'package:french_app/widgets/snackbar.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -311,10 +312,11 @@ class _MCQTestPageState extends State<MCQTestPage> {
             text: currentQuestionIndex == questions!.length - 1 ? 'Submit' : 'Next',
             onPressed: () {
               if (selectedOptions[currentQuestionIndex] == -1) {
+                showStyledSnackBar(context, 'Please select an option before proceeding');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Please select an option before proceeding',
+                      '',
                       style: TextStyle(color: Theme.of(context).colorScheme.onError),
                     ),
                     backgroundColor: Theme.of(context).colorScheme.error,

@@ -73,9 +73,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       padding: const EdgeInsets.all(16.0),
       children: [
         ListTile(
-          title: const Text(
+          title: Text(
             'Change Username',
             style: TextStyle(
+            color: Theme.of(context).colorScheme.onSecondary,
             fontSize: 14,
             ),
           ),
@@ -86,9 +87,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         ),
         const Divider(),
         ListTile(
-          title: const Text(
+          title: Text(
             'Change Password',
             style: TextStyle(
+            color: Theme.of(context).colorScheme.onSecondary,
             fontSize: 14,
             ),
           ),
@@ -99,9 +101,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         ),
         const Divider(),
         ListTile(
-          title: const Text(
+          title: Text(
             'Delete Account',
             style: TextStyle(
+            color: Theme.of(context).colorScheme.onSecondary,
             fontSize: 14,
             ),
           ),
@@ -126,7 +129,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Change your username',
             style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.primary,
             fontSize: 16,
             ),
           ),
@@ -139,12 +142,13 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 child: Text(
                   'Current username: $currentUsername',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.onSecondary,
                     fontSize: 14,
                   ),
                 ),
               ),
               TextField(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                 controller: newUsernameController,
                 decoration: const InputDecoration(
                   hintText: 'Enter new username',
@@ -218,7 +222,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Change your password',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme.of(context).colorScheme.primary,
               fontSize: 16,
             ),
           ),
@@ -226,6 +230,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                 controller: currentPasswordController,
                 decoration: const InputDecoration(
                   hintText: 'Enter current password',
@@ -234,6 +239,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                 controller: newPasswordController,
                 decoration: const InputDecoration(
                   hintText: 'Enter new password',
@@ -242,6 +248,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               ),
               const SizedBox(height: 8),
               TextField(
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
                 controller: confirmNewPasswordController,
                 decoration: const InputDecoration(
                   hintText: 'Confirm new password',
@@ -320,7 +327,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           title: Text(
             'Delete Account',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme.of(context).colorScheme.primary,
               fontSize: 16,
             ),
           ),
