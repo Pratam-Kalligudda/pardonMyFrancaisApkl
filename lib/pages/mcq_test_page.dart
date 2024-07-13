@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:french_app/models/questions.dart';
 import 'package:french_app/models/sublevel.dart';
+import 'package:french_app/providers/progress_provider.dart';
 import 'package:french_app/widgets/custom_button.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MCQTestPage extends StatefulWidget {
@@ -170,6 +172,8 @@ class _MCQTestPageState extends State<MCQTestPage> {
       if (response.statusCode == 200) {
         final prefs = await SharedPreferences.getInstance();
         prefs.setString('userProgress', response.body);
+
+        Provider.of<ProgressProvider>(context, listen: false).loadUserProgress();
       }
     } catch (error) {
       errorMessage = error.toString();
@@ -315,13 +319,10 @@ class _MCQTestPageState extends State<MCQTestPage> {
                   ),
                 );
               } else {
-                if (currentQuestionIndex == questions!.length - 1) {
-                  submitAnswer();
-                } else {
-                  nextQuestion();
-                }
+                submitAnswer();
               }
-            }, isLoading: false,
+            },
+            isLoading: false,
           ),
         ],
       ),

@@ -123,10 +123,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
+          title: Text(
             'Change your username',
             style: TextStyle(
-            fontSize: 18,
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 16,
             ),
           ),
           content: Column(
@@ -137,7 +138,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Current username: $currentUsername',
-                  style: const TextStyle(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 14,
                   ),
                 ),
@@ -213,10 +215,11 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
+          title: Text(
             'Change your password',
             style: TextStyle(
-              fontSize: 18,
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 16,
             ),
           ),
           content: Column(
@@ -314,15 +317,17 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text(
+          title: Text(
             'Delete Account',
             style: TextStyle(
-              fontSize: 18,
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 16,
             ),
           ),
-          content: const Text(
+          content: Text(
             'Are you sure you want to delete your account?',
             style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 14,
             ),
           ),

@@ -46,7 +46,7 @@ class LevelTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               CircleAvatarWithBorder(index: index),
-              const SizedBox(width: 18),
+              const SizedBox(width: 7),
               VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
               Expanded(
                 child: Text(
@@ -57,7 +57,7 @@ class LevelTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 2),
+              const SizedBox(width: 7),
               VerticalDivider(color: Theme.of(context).colorScheme.onSurface),
               Text(
                   "score: ${score.toStringAsFixed(0)}",

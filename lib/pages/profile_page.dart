@@ -413,11 +413,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: const Text('Select Avatar'),
+                                    title: Text(
+                                      'Select Avatar',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                     content: SizedBox(
                                       width: double.maxFinite,
-                                      child: GridView.count(
-                                        crossAxisCount: 3,
+                                      child: Wrap(
+                                        spacing: 8.0,
+                                        runSpacing: 8.0,
                                         children: List.generate(_avatars.length, (index) {
                                           return GestureDetector(
                                             onTap: () {
@@ -427,12 +434,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                               _updateProfile();
                                               Navigator.of(context).pop();
                                             },
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Image.asset(
-                                                _avatars[index],
-                                                fit: BoxFit.cover,
-                                              ),
+                                            child: Image.asset(
+                                              _avatars[index],
+                                              fit: BoxFit.cover,
+                                              width: 50,
+                                              height: 50,
                                             ),
                                           );
                                         }),
@@ -441,8 +447,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   );
                                 },
                               );
-                            },
-                          ),
+                                },
+                              ),
                         ),
                       ),
                     ],
